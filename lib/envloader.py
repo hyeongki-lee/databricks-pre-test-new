@@ -22,8 +22,16 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-#: lakehouse 스택의 비밀 파일. 컨테이너에는 없고 호스트에만 있다.
-ENV_PATH = Path(r"C:\Users\lee21\lakehouse\.env")
+#: 비밀 파일 탐색 순서. 앞의 것이 우선한다(단, 환경변수가 이미 있으면 안 덮어씀).
+#:
+#: Measured: lakehouse/.env 하나만 보면 이 프로젝트 전용 값이 빠져서
+#: `SLACK_WEBHOOK_URL` 이 빈 값으로 남았고, 알림 80건 중 78건이
+#: "웹훅 주소가 없습니다" 로 전송되지 않았다. 프로젝트 루트의 `.env` 도
+#: 함께 읽도록 여기를 추가했다.
+ENV_PATHS: list[Path] = [
+    Path(r"C:\Users\lee21\lakehouse\.env"),
+    Path(__file__).resolve().parent.parent / ".env",
+]
 
 #: 중복 로드 방지
 _loaded = False
@@ -60,27 +68,31 @@ def load() -> dict[str, str]:
         return {}
 
     _loaded = True
-    if not ENV_PATH.exists():
-        return {}
-
-    try:
-        content = ENV_PATH.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        content = ENV_PATH.read_text(encoding="utf-8-sig")
 
     parsed: dict[str, str] = {}
-    for line in content.splitlines():
-        pair = _parse_line(line)
-        if pair is None:
+    for env_path in ENV_PATHS:
+        if not env_path.exists():
             continue
-        key, value = pair
-        parsed[key] = value
-        os.environ.setdefault(key, value)
+        try:
+            content = env_path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            content = env_path.read_text(encoding="utf-8-sig")
+
+        for line in content.splitlines():
+            pair = _parse_line(line)
+            if pair is None:
+                continue
+            key, value = pair
+            # 나중 파일이 앞 결과를 덮어쓰지 않게 한다.
+            parsed.setdefault(key, value)
+            os.environ.setdefault(key, value)
 
     return parsed
 
 
 if __name__ == "__main__":
     loaded = load()
-    print(f"{ENV_PATH} 에서 {len(loaded)}개 값을 읽었습니다.")
+    print(f"{len(ENV_PATHS)}개 경로에서 {len(loaded)}개 값을 읽었습니다.")
+    for env_path in ENV_PATHS:
+        print(f"  {'있음' if env_path.exists() else '없음'}  {env_path}")
     print("키 이름:", ", ".join(sorted(loaded)))
