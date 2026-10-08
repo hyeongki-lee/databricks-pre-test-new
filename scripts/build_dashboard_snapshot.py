@@ -68,7 +68,14 @@ header .sub{color:#9fb0c3;font-size:13px;margin-top:3px}
 .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 60px}
 .notice{border-left:4px solid var(--warn);background:#fdf8ec;padding:13px 16px;
         border-radius:0 8px 8px 0;margin-bottom:18px;font-size:13.5px}
-.notice b{display:block;margin-bottom:5px}
+/* Measured: `.notice b{display:block}` 를 쓰면 문장 **안쪽**의 <b> 까지
+   블록이 되어 "읱기 전용" 과 "화면입니다." 가 어색하게 두 줄로 갈라진다.
+   그래서 제목 <b> 에만 적용한다. */
+.notice > b:first-of-type{display:block;margin-bottom:5px}
+.notice p{margin:0 0 8px}
+.notice p:last-child{margin-bottom:0}
+.notice ul{margin:0 0 8px;padding-left:22px}
+.notice li{margin:2px 0}
 .notice code{background:#fff;padding:1px 5px;border-radius:3px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
       gap:12px;margin-bottom:20px}
@@ -140,16 +147,22 @@ def _row_count(engine: str, schema: str, table: str) -> int | None:
 
 
 def load_runs() -> dict:
-    """Latest audit records, used to show what actually ran."""
+    """Latest audit records, used to show what actually ran.
+
+    Measured: the audit tables accumulate every run. Scoped only by
+    `work_type`, the 200-row smoke runs from earlier appear next to the
+    50,000-row verification, so the page shows `initial_load FAIL 10` and
+    `append FAIL 3` that belong to a superseded scale.
+
+    Rows are therefore filtered to the current scale:
+      · initial_load — `source_count = 50000`
+      · etl          — the most recent `run_id`
+    Nothing is deleted; the display simply stops mixing scales.
+    """
     try:
         from lib import dbx
         from lib import logtable
         meta = logtable.meta_schema()
-        result = dbx.execute_sql(
-            f"SELECT engine, etl_type, status_code, COUNT(*) AS cnt "
-            f"FROM {meta}.etl_run_log GROUP BY 1,2,3 ORDER BY 1,2,3")
-        columns = [c["name"] for c in result["columns"]]
-        etl = [dict(zip(columns, row)) for row in result["rows"]]
 
         result = dbx.execute_sql(
             f"SELECT engine, COUNT(*) AS cnt, "
@@ -158,7 +171,21 @@ def load_runs() -> dict:
             f"  AND source_count=50000 GROUP BY 1 ORDER BY 1")
         columns = [c["name"] for c in result["columns"]]
         load = [dict(zip(columns, row)) for row in result["rows"]]
-        return {"etl": etl, "load": load}
+
+        # 가장 최근 ETL 실행 하나만 집계한다.
+        rows = dbx.execute_sql(
+            f"SELECT run_id FROM {meta}.etl_run_log "
+            "GROUP BY run_id ORDER BY MAX(started_at) DESC LIMIT 1")
+        run_id = str(rows["rows"][0][0]) if rows["rows"] else ""
+
+        result = dbx.execute_sql(
+            f"SELECT engine, etl_type, status_code, COUNT(*) AS cnt "
+            f"FROM {meta}.etl_run_log WHERE run_id='{run_id}' "
+            f"GROUP BY 1,2,3 ORDER BY 1,2,3")
+        columns = [c["name"] for c in result["columns"]]
+        etl = [dict(zip(columns, row)) for row in result["rows"]]
+
+        return {"etl": etl, "load": load, "run_id": run_id}
     except Exception as exc:                    # noqa: BLE001
         return {"오류": f"{type(exc).__name__}: {exc}"}
 
@@ -191,14 +218,19 @@ def build() -> str:
 
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     add('<div class="notice"><b>이 페이지는 정적 스냅샷입니다</b>'
-        'GitHub Pages 는 정적 파일만 제공하므로 Python 을 실행하지 못합니다. '
-        '따라서 이 화면은 <b>프로파일 YAML 12개를 읽어 굽은 읽기 전용</b>视图입니다.'
-        '<br>아래는 <b>안 됩니다</b>: 원천 DB · Databricks 실시간 조회, '
-        '컬럼 체크박스로 exclude_columns 저장, 신규 테이블 등록.'
-        '<br>실시간 조회와 저장이 필요하면 로컬에서 실행하십시오: '
+        '<p style="margin:0 0 8px">GitHub Pages 는 정적 파일만 제공하므로 '
+        'Python 을 실행하지 못합니다. 따라서 이 화면은 프로파일 YAML 12개를 '
+        '읽어 만든 <b>읽기 전용</b> 화면입니다.</p>'
+        '<p style="margin:0 0 8px"><b>이 화면에서 안 되는 것</b></p>'
+        '<ul style="margin:0 0 8px;padding-left:22px">'
+        '<li>원천 DB · Databricks 실시간 조회</li>'
+        '<li>컬럼 체크박스로 <code>exclude_columns</code> 저장</li>'
+        '<li>신규 테이블 등록</li>'
+        '</ul>'
+        '<p style="margin:0">위 기능이 필요하면 로컬에서 실행하십시오: '
         '<code>python dashboard/app.py --port 8540</code> → '
         '<code>http://127.0.0.1:8540</code>'
-        f'<br>스냅샷 생성 시각: {escape(stamp)}</div>')
+        f'<br>스냅샷 생성 시각: {escape(stamp)}</p></div>')
 
     add('<div class="kpis">')
     for value, label in [(len(schemas), "프로파일 스키마"),
@@ -283,7 +315,12 @@ def build() -> str:
                 f'<td>{row["cnt"]}</td></tr>')
         add("</tbody></table>")
     add('<p class="muted">출처: <code>workspace.pretest_meta.load_audit</code>, '
-        '<code>etl_run_log</code></p>')
+        '<code>etl_run_log</code>'
+        + (f" · ETL 기준 <code>{escape(runs['run_id'])}</code>"
+           if runs.get("run_id") else "")
+        + '<br>감사 테이블은 실행을 누적하므로 <b>현재 검증 규모만</b> 표시한다'
+        '(초기 이관 = 50,000건, ETL = 가장 최근 run_id). '
+        '과거 200건 시험 기록은 행 삭제 없이 표시 범위만 한정했다.</p>')
     add("</section>")
 
     # ---------------- 컬럼 결정 규칙 ----------------
