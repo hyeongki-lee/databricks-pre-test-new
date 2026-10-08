@@ -35,7 +35,12 @@ CDC_RESULT = ROOT / "work" / "cdc" / "cdc_all_result.json"
 OWNER = "hyeongki-lee"
 REPO = f"{OWNER}/databricks-pre-test-new"
 REPO_URL = f"https://github.com/{REPO}"
-PAGES_URL = f"https://{OWNER}.github.io/{REPO}/databricks-pre-test-manual.html"
+
+# Measured: Pages serves the repository root, so the path includes `manual/`.
+# Without it the site returns 404 ("The site configured at this address does
+# not contain the requested file"), because there is no index.html at the root.
+PAGES_URL = (f"https://{OWNER}.github.io/databricks-pre-test-new"
+             f"/{MANUAL.parent.name}/{MANUAL.name}")
 
 DEFAULT_TO = "mercy.lee@kakaopaycorp.com"
 REQUIRED_SCALE = 50000
@@ -71,32 +76,41 @@ def build_summary() -> dict:
         data = json.loads(EVIDENCE.read_text(encoding="utf-8"))
 
     sources = data.get("원천") or {}
-    per_table = 0
-    for detail in sources.values():
-        if not isinstance(detail, dict):
-            continue
-        # Measured: the per-schema detail lives under a "스키마" key. Reading
-        # detail.values() directly mixes dicts with ints and yields 0.
-        schemas = detail.get("스키마") or {}
-        per = [v for v in schemas.values() if isinstance(v, dict)]
-        tables = sum(int(v.get("테이블수", 0) or 0) for v in per)
-        rows = sum(int(v.get("총건수", 0) or 0) for v in per)
-        if tables:
-            per_table = max(per_table, rows // tables)
+
+    # 검증 규모는 원천 집계에서 나눠 구하지 않는다.
+    # Measured: 그 결과는 CDC 시나리오가 지운 행까지 평균에 섞여 49,995 가 되고,
+    # "요구사항 5만 건 미달" 로 잘못 표시된다. 초기 이관이 파일의 원본 건수를
+    # 그대로 기록한 값이 권위 있는 답이다 (매뉴얼과 동일하게 맞춘다).
+    logs = data.get("로그") or {}
+    scale_rows = [int(r.get("source_count") or 0)
+                  for r in (logs.get("초기이관_규모별") or [])
+                  if isinstance(r, dict)]
+    scale_rows = [v for v in scale_rows if v > 0]
+    per_table = (max(set(scale_rows), key=scale_rows.count)
+                 if scale_rows else 0)
 
     cdc: dict = {}
     if CDC_RESULT.exists():
         cdc = json.loads(CDC_RESULT.read_text(encoding="utf-8"))
 
     logs = data.get("로그") or {}
+
+    def as_int(value) -> int:
+        """Counts come back from Databricks as strings ('390'), so a plain
+        `f"{value:,}"` raises `Cannot specify ',' with 's'`."""
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
     return {
         "per_table": per_table,
-        "tables": (sources.get("합계") or {}).get("테이블", 0),
-        "rows": (sources.get("합계") or {}).get("건수", 0),
-        "s3_objects": (data.get("S3") or {}).get("전체객체", 0),
-        "load_audit": (logs.get("load_audit") or {}).get("건수", 0),
-        "etl_run_log": (logs.get("etl_run_log") or {}).get("건수", 0),
-        "slack": (data.get("slack") or {}).get("총건수", 0),
+        "tables": as_int((sources.get("합계") or {}).get("테이블", 0)),
+        "rows": as_int((sources.get("합계") or {}).get("건수", 0)),
+        "s3_objects": as_int((data.get("S3") or {}).get("전체객체", 0)),
+        "load_audit": as_int((logs.get("load_audit") or {}).get("건수", 0)),
+        "etl_run_log": as_int((logs.get("etl_run_log") or {}).get("건수", 0)),
+        "slack": as_int((data.get("slack") or {}).get("총건수", 0)),
         "deid_ok": bool((data.get("비식별화") or {}).get("일치여부")),
         "cdc_verdict": cdc.get("전체판정", "-"),
         "cdc_pass": cdc.get("통과", 0),
@@ -186,9 +200,12 @@ def main() -> int:
     host = env.get("SMTP_HOST")
     port = int(env.get("SMTP_PORT", "587"))
     user = env.get("SMTP_USER")
-    password = env.get("SMTP_PASSWORD")
+    # Measured: this environment names the secret `SMTP_PASS`, not
+    # `SMTP_PASSWORD`. Accept either so the script works with both layouts.
+    password = env.get("SMTP_PASSWORD") or env.get("SMTP_PASS")
     sender = env.get("EMAIL_FROM") or user
-    recipient = env.get("MAIL_TO") or DEFAULT_TO
+    # Same story for the recipient key: `EMAIL_TO` here, `MAIL_TO` elsewhere.
+    recipient = (env.get("MAIL_TO") or env.get("EMAIL_TO") or DEFAULT_TO)
 
     missing = [name for name, value in
                (("SMTP_HOST", host), ("SMTP_USER", user),
