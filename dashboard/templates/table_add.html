@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block body %}
+{% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ category }}">{{ message }}</div>
+{% endfor %}
+
+<h2 style="font-size:16px;margin:0 0 12px">신규 테이블 등록</h2>
+
+<form method="get" action="/table/add" class="card">
+  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <label>엔진 <select name="engine" onchange="this.form.submit()">
+      {% for e in engines %}
+      <option value="{{ e }}" {% if engine == e %}selected{% endif %}>{{ e }}</option>
+      {% endfor %}
+    </select></label>
+    <label>스키마 <select name="schema" onchange="this.form.submit()">
+      {% for s in schemas %}
+      <option value="{{ s }}" {% if schema == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select></label>
+    <button type="submit">조회</button>
+  </div>
+</form>
+
+{% if schema %}
+<form method="post" action="/table/add" class="card">
+  <input type="hidden" name="engine" value="{{ engine }}">
+  <input type="hidden" name="schema" value="{{ schema }}">
+  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+    <label>테이블 <select name="table">
+      {% for t in tables %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+    </select></label>
+    <label>처리 종류 <select name="etl_type">
+      {% for code, label in load_types.items() %}
+      <option value="{{ code }}">{{ label }}</option>{% endfor %}
+    </select></label>
+    <label>기본키 <input name="primary_key" placeholder="id" size="6"></label>
+    <label>작업주기 <select name="schedule_type">
+      {% for code, label in schedule_codes.items() %}
+      <option value="{{ code }}">{{ label }}</option>{% endfor %}
+    </select></label>
+  </div>
+  <p class="mut" style="font-size:12.5px">
+    등록 시 <code>config/profiles/{{ engine }}_{{ schema }}.yaml</code> 이 있으면 갱신,
+    없으면 새로 생성합니다.</p>
+  <button type="submit">등록</button>
+</form>
+{% endif %}
+{% endblock %}

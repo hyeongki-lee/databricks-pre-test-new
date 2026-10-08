@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block body %}
+{% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ category }}">{{ message }}</div>
+{% endfor %}
+
+<h2 style="font-size:16px;margin:0 0 12px">ETL 빌더 — 새 테이블을 프로파일에 등록</h2>
+
+<form method="get" action="/builder" class="card">
+  <b style="font-size:13px">1단계 · 원천 선택 (대시보드 실행 시 실제 접속하여 조회)</b>
+  <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+    <label>엔진 <select name="engine" onchange="this.form.submit()">
+      {% for e in engines %}
+      <option value="{{ e }}" {% if request.args.get('engine') == e %}selected{% endif %}>{{ e }}</option>
+      {% endfor %}
+    </select></label>
+    <label>스키마
+      <select name="schema">
+        {% for e in engines %}
+          {% if e == request.args.get('engine', engines[0]) %}
+            {% for s in live.engines.get(e, {}) %}
+            <option value="{{ s }}" {% if request.args.get('schema') == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </select></label>
+    <button type="submit">조회</button>
+  </div>
+</form>
+
+{% set engine = request.args.get('engine', engines[0]) %}
+{% set schema = request.args.get('schema', '') %}
+{% if schema %}
+<form method="post" action="/builder/register" class="card">
+  <input type="hidden" name="engine" value="{{ engine }}">
+  <input type="hidden" name="schema" value="{{ schema }}">
+  <b style="font-size:13px">2단계 · 테이블 선택</b>
+  <div style="margin:8px 0 14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+    <label>테이블
+      <select name="table" id="tbl">
+        {% for t in live.engines.get(engine, {}).get(schema, {}).get('tables', {}) %}
+        <option value="{{ t }}">{{ t }} — {{ '{:,}'.format(t and live.engines[engine][schema]['tables'][t]['rows'] or 0) }}건</option>
+        {% endfor %}
+      </select></label>
+    <label>처리 종류 <select name="etl_type">
+      {% for code, label in load_types.items() %}
+      <option value="{{ code }}">{{ label }}</option>{% endfor %}
+    </select></label>
+    <label>기본키 <input name="primary_key" placeholder="id" size="6"></label>
+    <label>작업주기 <select name="schedule_type">
+      {% for code, label in schedule_codes.items() %}
+      <option value="{{ code }}">{{ label }}</option>{% endfor %}
+    </select></label>
+    <label>활성 <select name="active"><option value="N">N</option>
+      <option value="Y">Y</option></select></label>
+  </div>
+
+  <b style="font-size:13px">3단계 · 컬럼 지정 (전체 표시 · 체크 해제하면 exclude)</b>
+  <div class="scroll" style="margin-top:8px">
+    <table id="cols">
+      <tr><th>include</th><th>exclude</th><th>컬럼</th><th>비식별화</th></tr>
+    </table>
+  </div>
+  <p class="mut" style="font-size:12.5px">
+    등록하면 해당 스키마의 YAML 이 있으면 갱신하고, 없으면 새로 만듭니다.</p>
+  <button type="submit">프로파일 등록</button>
+</form>
+
+<script>
+// 원천 컬럼은 서버가 이미 조회해 두었다. 여기서는 화면 조작 편의만 제공한다.
+const COLS = {{ live.engines.get(engine, {}).get(schema, {}).get('tables', {}) | tojson }};
+const CODES = {{ deid_codes | tojson }};
+function render(){
+  const sel = document.getElementById('tbl');
+  const tbl = document.getElementById('cols');
+  const cols = (COLS[sel.value] || {}).columns || [];
+  tbl.innerHTML = '<tr><th>include</th><th>exclude</th><th>컬럼</th><th>비식별화</th></tr>';
+  cols.forEach(function(c){
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><input type="checkbox" name="include_columns" value="'+c+'"></td>' +
+      '<td><input type="checkbox" name="exclude_columns" value="'+c+'"></td>' +
+      '<td><code>'+c+'</code></td>' +
+      '<td><select name="deid__'+c+'"><option value="">—</option>' +
+      Object.keys(CODES).map(function(k){
+        return '<option value="'+k+'">'+k+' '+CODES[k]+'</option>';}).join('') +
+      '</select></td>';
+    tbl.appendChild(tr);
+  });
+}
+document.getElementById('tbl').addEventListener('change', render);
+render();
+</script>
+{% endif %}
+{% endblock %}

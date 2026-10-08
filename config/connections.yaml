@@ -1,0 +1,131 @@
+# ============================================================================
+# 접속 설정 (시크릿은 값을 넣지 않는다. .env 또는 Airflow Variable 에서 읽는다.)
+#
+#   - 로컬 실행  : C:\Users\lee21\lakehouse\.env 를 환경변수로 읽는다.
+#   - Airflow 실행: 컨테이너 환경변수 + Airflow Variable 을 우선한다.
+#
+# 이 파일에는 평문 비밀번호를 두지 않는다.
+# ============================================================================
+
+project:
+  name: databricks-pre-test-new
+  # 소스 데이터의 로컬 원본 위치. data-prep 이 여기에 Iceberg 형식 파일을 쓴다.
+  # rclone 은 이 폴더를 S3 로 복제한다.
+  local_data_root: "C:/Users/lee21/lakehouse/pretest-data"
+
+# ---------------------------------------------------------------------------
+# 원천 데이터베이스 3종
+#   각 엔진당 스키마 4개 × 테이블 5개 = 엔진당 20 테이블, 전체 60 테이블
+# ---------------------------------------------------------------------------
+sources:
+
+  mysql:
+    driver_label: MySQL 8.4
+    host: mysql          # docker compose 네트워크 안에서 쓰이는 호스트명
+    host_local: localhost # 호스트(윈도우)에서 직접 붙을 때
+    port: 3306
+    user_env: MYSQL_ROOT_PASSWORD
+    user: root
+    # 스키마 4개
+    schemas: [mysql_schema_1, mysql_schema_2, mysql_schema_3, mysql_schema_4]
+    tables_per_schema: 5
+    rows_per_table: 50000
+
+  mongodb:
+    driver_label: MongoDB 7
+    host: mongodb
+    host_local: localhost
+    port: 27017
+    user: admin
+    password_env: MONGO_ROOT_PASSWORD
+    # .env 에 MONGO_ROOT_PASSWORD 가 없을 수 있다.
+    # docker-compose.yml 의 기본값(${MONGO_ROOT_PASSWORD:-rootpass})과 같게 맞춘다.
+    password_default: rootpass
+    auth_source: admin
+    schemas: [mongo_schema_1, mongo_schema_2, mongo_schema_3, mongo_schema_4]
+    tables_per_schema: 5
+    rows_per_table: 50000
+
+  postgresql:
+    driver_label: PostgreSQL 16
+    host: postgres
+    host_local: localhost
+    port: 5432
+    user: postgres
+    password_env: POSTGRES_PASSWORD
+    # ⚠ 실측 함정: `pg_` 로 시작하는 스키마명은 PostgreSQL 이 예약어로 막는다.
+    #   CREATE SCHEMA pg_schema_1 → `unacceptable schema name "pg_schema_1"` (SQLSTATE 42939)
+    #   그래서 `postgres_schema_1` 로 지었다.
+    schemas: [postgres_schema_1, postgres_schema_2, postgres_schema_3, postgres_schema_4]
+    tables_per_schema: 5
+    rows_per_table: 50000
+
+# ---------------------------------------------------------------------------
+# Databricks (Free Edition · 오하이오 리전)
+#   워크스페이스 A. 토큰은 .env 의 DATABRICKS_TOKEN / DATABRICKS_HOST.
+# ---------------------------------------------------------------------------
+databricks:
+  host_env: DATABRICKS_HOST
+  warehouse_id: 074405e9ceba80af
+  catalog: workspace
+  # 로그/감사 테이블은 다른 프로젝트(meta)와 섞지 않는 별도 네임스페이스를 쓴다.
+  meta_schema: pretest_meta
+  # SQL 실행 결과 대기 기본값
+  wait_timeout: 30s
+  poll_interval: 0.5
+
+# ---------------------------------------------------------------------------
+# S3 (서울 리전)
+# ---------------------------------------------------------------------------
+s3:
+  bucket: databricks-test-lhk
+  region: ap-northeast-2
+  # 이 접두 아래로 모든 원천 파일이 올라간다.
+  prefix: pretest
+  # 데이터 준비 완료 신호 파일명 (로컬에 생성 → rclone 이 S3 로 복제)
+  chk_file: _chk.json
+  # rclone 복제 완료 신호 파일명 (Airflow 가 rclone API 응답 뒤 S3 에 직접 쓴다)
+  rclone_done_file: _rclone_done.json
+
+# ---------------------------------------------------------------------------
+# rclone rcd (원격 제어 서버)
+#   API 로 호출한다. 셸 명령을 직접 실행하지 않는다.
+# ---------------------------------------------------------------------------
+rclone:
+  rc_url: http://localhost:5572
+  rc_user_env: RCLONE_RC_USER
+  # lakehouse/.env 에 RCLONE_RC_PASS 가 없으므로 기존 rclone-gui 비밀번호를 쓴다.
+  # 두 값이 같은 역할(원격 제어 인증)이라 재사용해도 무방하다.
+  rc_pass_env: RCLONE_RC_PASS
+  rc_pass_fallback_env: RCLONE_GUI_PASS
+  # ⚠ 실측: rclone 이 `RCLONE_CONFIG_<이름>` 환경변수로 만드는 리모트는
+  #   하이픈(-)이 아니라 **밑줄(_)** 이 된다.
+  #   RCLONE_CONFIG_LAKEHOUSE_SEOUL_TYPE=s3  →  리모트 이름 `lakehouse_seoul`
+  remote_name: lakehouse_seoul   # rclone.conf 에 정의된 리모트 이름
+  # 증분 복제. Folder 단위로 복제해 metadata变动이 함께 반영된다.
+  mode: copy
+
+# ---------------------------------------------------------------------------
+# Slack (기존 etl-fabric 테스트 공간 재사용)
+#   발송은 Airflow Variable SLACK_WEBHOOK_URL / SLACK_CHANNEL_ID 를 쓴다.
+#   로컬에서 직접 실행할 때는 .env 의 SLACK_WEBHOOK_URL 을 쓴다.
+# ---------------------------------------------------------------------------
+slack:
+  channel: C0C53BAG812
+  channel_var: SLACK_CHANNEL_ID
+  webhook_var: SLACK_WEBHOOK_URL
+
+# ---------------------------------------------------------------------------
+# ETL 처리에 쓰이는 상수
+# ---------------------------------------------------------------------------
+etl:
+  # 비식별화 코드 (요구사항: hash / null 처리 / masking)
+  deid_codes:
+    D1: hash          # SHA-256 해시
+    D2: null          # null 로 대체
+    D3: masking       # 마스킹
+  hash_salt: ""       # D1 에 사용할 소금. 비워두면 순수 SHA-256.
+  mask_keep: 2        # D3 에서 앞뒤로 남기는 글자 수
+  # 적재 완료 로그 테이블 / ETL 실행 로그 테이블
+  audit_table: "{catalog}.{meta_schema}.load_audit"
+  runlog_table: "{catalog}.{meta_schema}.etl_run_log"

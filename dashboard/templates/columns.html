@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<h2 style="font-size:16px;margin:0 0 12px">컬럼 현황 — 원천 3종 전체 ({{ matrix|length }}개 테이블)</h2>
+
+{% for engine in engines %}
+{% set rows = matrix | selectattr('engine', 'equalto', engine) | list %}
+<div class="card">
+  <h2>{{ engine }} <span class="mut" style="font-weight:400;font-size:13px">
+    ({{ rows|length }}개 테이블)</span></h2>
+  <div class="scroll">
+  <table>
+    <tr><th>스키마</th><th>테이블</th><th>건수</th><th style="width:55%">컬럼</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.schema }}</td>
+      <td><a href="/profiles/{{ r.engine }}/{{ r.schema }}">{{ r.table }}</a></td>
+      <td>{{ '{:,}'.format(r.rows) }}</td>
+      <td>{% for c in r.columns %}<code style="margin-right:4px">{{ c }}</code>{% endfor %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,142 @@
+{
+  "run_id": "etl_all_p3b",
+  "workers": 3,
+  "targets": 12,
+  "succeeded": 15,
+  "failed": 0,
+  "skipped": 45,
+  "summaries": [
+    {
+      "engine": "mysql",
+      "schema": "mysql_schema_1",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 7.06,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mysql",
+      "schema": "mysql_schema_2",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 6.08,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mysql",
+      "schema": "mysql_schema_3",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 9.91,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mysql",
+      "schema": "mysql_schema_4",
+      "succeeded": 2,
+      "failed": 0,
+      "skipped": 3,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 7.53,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mongodb",
+      "schema": "mongo_schema_1",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 5.73,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mongodb",
+      "schema": "mongo_schema_2",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 5.96,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mongodb",
+      "schema": "mongo_schema_3",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 6.69,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "mongodb",
+      "schema": "mongo_schema_4",
+      "succeeded": 2,
+      "failed": 0,
+      "skipped": 3,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 7.59,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "postgres_schema_1",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 5.14,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "postgres_schema_2",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 5.02,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "postgres_schema_3",
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 4,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 6.54,
+      "run_id": "etl_all_p3b"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "postgres_schema_4",
+      "succeeded": 2,
+      "failed": 0,
+      "skipped": 3,
+      "total": 5,
+      "workers": 3,
+      "duration_sec": 7.55,
+      "run_id": "etl_all_p3b"
+    }
+  ]
+}

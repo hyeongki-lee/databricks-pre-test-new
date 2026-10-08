@@ -1,0 +1,141 @@
+engine: mongodb
+schema: mongo_schema_4
+registered_at: '2026-10-08'
+updated_at: '2026-10-08T09:10:13+09:00'
+schedule:
+  type: daily
+tables:
+  table_1:
+    columns:
+    - id
+    - name
+    - email
+    - phone
+    - address
+    - age
+    - salary
+    - created_at
+    - updated_at
+    - is_active
+    - description
+    include_columns: []
+    exclude_columns:
+    - address
+    deidentification:
+      name: D1
+      email: D2
+      phone: D3
+    etl_type: append
+    primary_key: ''
+    schedule:
+      type: quarterly
+      fixed_day: 1
+    registered_at: '2026-10-08'
+    active: Y
+  table_2:
+    columns:
+    - id
+    - name
+    - email
+    - phone
+    - address
+    - age
+    - salary
+    - created_at
+    - updated_at
+    - is_active
+    - description
+    include_columns: []
+    exclude_columns:
+    - description
+    deidentification:
+      name: D2
+      email: D3
+      phone: D1
+    etl_type: truncate
+    primary_key: ''
+    schedule:
+      type: semi_annually
+      fixed_day: 1
+    registered_at: '2026-10-08'
+    active: Y
+  table_3:
+    columns:
+    - id
+    - name
+    - email
+    - phone
+    - address
+    - age
+    - salary
+    - created_at
+    - updated_at
+    - is_active
+    - description
+    include_columns: []
+    exclude_columns:
+    - is_active
+    deidentification:
+      name: D3
+      email: D1
+      phone: D2
+    etl_type: merge
+    primary_key: id
+    schedule:
+      type: annually
+      fixed_day: 1
+    registered_at: '2026-10-08'
+    active: Y
+  table_4:
+    columns:
+    - id
+    - name
+    - email
+    - phone
+    - address
+    - age
+    - salary
+    - created_at
+    - updated_at
+    - is_active
+    - description
+    include_columns: []
+    exclude_columns:
+    - age
+    deidentification:
+      name: D1
+      email: D3
+      phone: D2
+    etl_type: merge
+    primary_key: id
+    schedule:
+      type: daily
+    registered_at: '2026-10-08'
+    active: Y
+  table_5:
+    columns:
+    - id
+    - name
+    - email
+    - phone
+    - address
+    - age
+    - salary
+    - created_at
+    - updated_at
+    - is_active
+    - description
+    include_columns: []
+    exclude_columns:
+    - salary
+    deidentification:
+      name: D2
+      email: D1
+      phone: D3
+    etl_type: append
+    primary_key: ''
+    schedule:
+      type: weekly
+      day_of_week: 3
+    registered_at: '2026-10-08'
+    active: Y

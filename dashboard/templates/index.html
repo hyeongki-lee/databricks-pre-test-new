@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block body %}
+
+{% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ category }}">{{ message }}</div>
+{% endfor %}
+
+<!-- ① 등록된 ETL 정보 -->
+<div class="card">
+  <h2>등록된 ETL 프로파일 — 스키마 단위 YAML {{ profiles|length }}개</h2>
+  <table>
+    <tr><th>파일</th><th>엔진</th><th>스키마</th><th>테이블</th>
+        <th>활성(Y)</th><th>작업주기</th><th>등록일자</th><th>편집</th></tr>
+    {% for p in profiles %}
+    <tr>
+      <td><code>{{ p.파일 }}</code></td>
+      <td>{{ p.엔진 }}</td><td>{{ p.스키마 }}</td>
+      <td>{{ p.테이블수 }}</td>
+      <td class="{% if p.활성수 == p.테이블수 and p.테이블수 %}ok{% else %}mut{% endif %}">
+          {{ p.활성수 }} / {{ p.테이블수 }}</td>
+      <td>{{ p.작업주기 }}</td>
+      <td class="mut">{{ p.등록일자 }}</td>
+      <td><a href="/profiles/{{ p.엔진 }}/{{ p.스키마 }}">열기</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="mut">
+        등록된 프로파일이 없습니다. <code>scripts/01_make_profiles.py</code> 를 실행하십시오.
+    </td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<!-- ② Databricks 통계 (요구사항 9번) -->
+<div class="card">
+  <h2>Databricks 실행 통계 — worklog.pretest_meta 에서 직접 조회</h2>
+  {% if not stats.get('사용 가능') %}
+    <p class="mut">{{ stats.get('사유') }}</p>
+  {% else %}
+  <div class="grid" style="margin-bottom:14px">
+    <div class="kpi"><b>{{ stats.load_audit_건수 }}</b><span>load_audit 행 (건수 체크)</span></div>
+    <div class="kpi"><b>{{ stats.etl_run_log_건수 }}</b><span>etl_run_log 행 (성공/실패)</span></div>
+    <div class="kpi"><b>{{ stats.집계|length }}</b><span>집계 조합</span></div>
+  </div>
+
+  <h3>집계</h3>
+  <table>
+    <tr><th>work_type</th><th>status_code</th><th>건수</th></tr>
+    {% for row in stats.집계 %}
+    <tr><td>{{ row.work_type }}</td>
+        <td class="{% if row.status_code == 'OK' %}ok{% else %}ng{% endif %}">
+            {{ row.status_code }}</td>
+        <td>{{ row.cnt }}</td></tr>
+    {% endfor %}
+  </table>
+
+  {% if stats.최근건 %}
+  <h3>최근 실행 이력 (최신순)</h3>
+  <div class="scroll"><table>
+    <tr><th>run_id</th><th>work_type</th><th>대상</th><th>etl_type</th>
+        <th>판정</th><th>원본</th><th>대상</th><th>초</th></tr>
+    {% for r in stats.최근건 %}
+    <tr>
+      <td class="mut">{{ r.run_id[:22] }}</td>
+      <td>{{ r.work_type }}</td>
+      <td>{{ r.engine }}.{{ r.schema_name }}.{{ r.table_name }}</td>
+      <td>{{ r.etl_type }}</td>
+      <td class="{% if r.status_code == 'OK' %}ok{% else %}ng{% endif %}">
+          {{ r.status_code }}</td>
+      <td>{{ '{:,}'.format(r.source_count|int) }}</td>
+      <td>{{ '{:,}'.format(r.target_count|int) }}</td>
+      <td class="mut">{{ '%.1f'|format(r.duration_sec|float) }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+  {% endif %}
+</div>
+
+<!-- ③ 원천 실시간 조회 (요구사항 2번) -->
+<div class="card">
+  <h2>원천 데이터베이스 실시간 현황 — 대시보드 실행 시 접속하여 조회</h2>
+  {% for engine, schemas in discovery.engines.items() %}
+    <h3>{{ engine }}</h3>
+    <table>
+      <tr><th>스키마</th><th>테이블</th><th>총 건수</th><th>컬럼 수</th><th>프로파일</th></tr>
+      {% for schema, detail in schemas.items() %}
+      {% set cols = detail.tables.values()|map(attribute='columns')|map('length')|list %}
+      <tr>
+        <td><a href="/profiles/{{ engine }}/{{ schema }}">{{ schema }}</a></td>
+        <td>{{ detail.tables|length }}</td>
+        <td>{{ detail.tables.values()|map(attribute='rows')|sum }}</td>
+        <td class="mut">{{ cols[0] if cols else '-' }}</td>
+        <td class="mut">{{ engine }}_{{ schema }}.yaml</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endfor %}
+  {% for err in discovery.errors %}<p class="ng">{{ err }}</p>{% endfor %}
+</div>
+
+<!-- ④ 코드 사전 -->
+<div class="card">
+  <h2>코드 사전</h2>
+  <div class="grid">
+    <div><b>비식별화</b>
+      <table style="margin-top:6px">
+        {% for code, label in deid_codes.items() %}
+        <tr><td><code>{{ code }}</code></td><td>{{ label }}</td></tr>{% endfor %}
+      </table></div>
+    <div><b>처리 종류</b>
+      <table style="margin-top:6px">
+        {% for code, label in load_types.items() %}
+        <tr><td><code>{{ code }}</code></td><td>{{ label }}</td></tr>{% endfor %}
+      </table></div>
+    <div><b>작업 주기</b>
+      <table style="margin-top:6px">
+        {% for code, label in schedule_codes.items() %}
+        <tr><td><code>{{ code }}</code></td><td>{{ label }}</td></tr>{% endfor %}
+      </table></div>
+  </div>
+</div>
+
+{% endblock %}

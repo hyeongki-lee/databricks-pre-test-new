@@ -1,0 +1,1024 @@
+{
+  "수집시각": "2026-10-08T17:09:59+09:00",
+  "워크스페이스": {
+    "카탈로그": [
+      "bg13_mysql",
+      "bg7_mysql",
+      "samples",
+      "system",
+      "workspace"
+    ],
+    "workspace_스키마": [
+      "default",
+      "information_schema",
+      "mongodb",
+      "mysql",
+      "postgresql",
+      "pretest_meta"
+    ],
+    "스키마별_테이블수": {
+      "default": 52,
+      "information_schema": 29,
+      "mongodb": 5,
+      "mysql": 5,
+      "postgresql": 5,
+      "pretest_meta": 2
+    },
+    "총테이블": 98
+  },
+  "원천": {
+    "mysql": {
+      "스키마": {
+        "mysql_schema_1": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "mysql_schema_2": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "mysql_schema_3": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "mysql_schema_4": {
+          "테이블수": 5,
+          "총건수": 249900,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        }
+      },
+      "테이블수": 20,
+      "총건수": 999900
+    },
+    "mongodb": {
+      "스키마": {
+        "mongo_schema_1": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "address",
+            "age",
+            "created_at",
+            "description",
+            "email",
+            "id",
+            "is_active",
+            "name",
+            "phone",
+            "salary",
+            "updated_at"
+          ]
+        },
+        "mongo_schema_2": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "address",
+            "age",
+            "created_at",
+            "description",
+            "email",
+            "id",
+            "is_active",
+            "name",
+            "phone",
+            "salary",
+            "updated_at"
+          ]
+        },
+        "mongo_schema_3": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "address",
+            "age",
+            "created_at",
+            "description",
+            "email",
+            "id",
+            "is_active",
+            "name",
+            "phone",
+            "salary",
+            "updated_at"
+          ]
+        },
+        "mongo_schema_4": {
+          "테이블수": 5,
+          "총건수": 249900,
+          "컬럼수": 11,
+          "컬럼": [
+            "address",
+            "age",
+            "created_at",
+            "description",
+            "email",
+            "id",
+            "is_active",
+            "name",
+            "phone",
+            "salary",
+            "updated_at"
+          ]
+        }
+      },
+      "테이블수": 20,
+      "총건수": 999900
+    },
+    "postgresql": {
+      "스키마": {
+        "postgres_schema_1": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "postgres_schema_2": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "postgres_schema_3": {
+          "테이블수": 5,
+          "총건수": 250000,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        },
+        "postgres_schema_4": {
+          "테이블수": 5,
+          "총건수": 249900,
+          "컬럼수": 11,
+          "컬럼": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ]
+        }
+      },
+      "테이블수": 20,
+      "총건수": 999900
+    },
+    "합계": {
+      "테이블": 60,
+      "건수": 2999700
+    }
+  },
+  "S3": {
+    "버킷": "databricks-test-lhk",
+    "접두": "pretest",
+    "전체객체": 386,
+    "총크기": 153882157,
+    "chk파일": 60,
+    "parquet": 184,
+    "metadata": 130,
+    "rclone_done": 12,
+    "샘플키": [
+      "pretest/mongodb/mongo_schema_1/_rclone_done.json",
+      "pretest/mongodb/mongo_schema_1/table_1/_chk.json",
+      "pretest/mongodb/mongo_schema_1/table_1/data/00000.parquet",
+      "pretest/mongodb/mongo_schema_1/table_1/data/00001.parquet",
+      "pretest/mongodb/mongo_schema_1/table_1/data/00002.parquet",
+      "pretest/mongodb/mongo_schema_1/table_1/metadata/v1.manifest.json",
+      "pretest/mongodb/mongo_schema_1/table_1/metadata/v1.metadata.json",
+      "pretest/mongodb/mongo_schema_1/table_2/_chk.json"
+    ]
+  },
+  "로그": {
+    "스키마": "workspace.pretest_meta",
+    "load_audit": {
+      "존재": true,
+      "건수": "390",
+      "컬럼": [
+        "run_id",
+        "work_type",
+        "engine",
+        "schema_name",
+        "table_name",
+        "target_table",
+        "etl_type",
+        "source_count",
+        "target_count",
+        "count_diff",
+        "count_match",
+        "column_added",
+        "column_deleted",
+        "excluded_columns",
+        "file_count",
+        "started_at",
+        "ended_at",
+        "duration_sec",
+        "message",
+        "detail_json"
+      ]
+    },
+    "etl_run_log": {
+      "존재": true,
+      "건수": "390",
+      "컬럼": [
+        "run_id",
+        "work_type",
+        "engine",
+        "schema_name",
+        "table_name",
+        "target_table",
+        "etl_type",
+        "status",
+        "status_code",
+        "workers",
+        "schedule_code",
+        "schedule_hit",
+        "active_flag",
+        "excluded_columns",
+        "deid_applied",
+        "row_affected",
+        "started_at",
+        "ended_at",
+        "duration_sec",
+        "statement_id",
+        "message",
+        "detail_json"
+      ]
+    },
+    "load_audit_집계": [
+      {
+        "engine": "mongodb",
+        "work_type": "initial_load",
+        "etl_type": "initial_load",
+        "count_match": "Y",
+        "cnt": "40"
+      },
+      {
+        "engine": "mysql",
+        "work_type": "initial_load",
+        "etl_type": "initial_load",
+        "count_match": "Y",
+        "cnt": "40"
+      },
+      {
+        "engine": "postgresql",
+        "work_type": "initial_load",
+        "etl_type": "initial_load",
+        "count_match": "Y",
+        "cnt": "40"
+      }
+    ],
+    "초기이관_실행목록": [
+      {
+        "run_id": "initial_20261008_160627",
+        "engine": "mysql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:06:29.638Z"
+      },
+      {
+        "run_id": "initial_20261008_160829",
+        "engine": "mysql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:08:30.203Z"
+      },
+      {
+        "run_id": "initial_20261008_161032",
+        "engine": "mysql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:10:33.365Z"
+      },
+      {
+        "run_id": "initial_20261008_161235",
+        "engine": "mysql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:12:36.297Z"
+      },
+      {
+        "run_id": "initial_20261008_161439",
+        "engine": "mongodb",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:14:40.038Z"
+      },
+      {
+        "run_id": "initial_20261008_161641",
+        "engine": "mongodb",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:16:41.722Z"
+      },
+      {
+        "run_id": "initial_20261008_161843",
+        "engine": "mongodb",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:18:44.166Z"
+      },
+      {
+        "run_id": "initial_20261008_162041",
+        "engine": "mongodb",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:20:42.201Z"
+      },
+      {
+        "run_id": "initial_20261008_162239",
+        "engine": "postgresql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:22:39.391Z"
+      },
+      {
+        "run_id": "initial_20261008_162436",
+        "engine": "postgresql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:24:36.529Z"
+      },
+      {
+        "run_id": "initial_20261008_162632",
+        "engine": "postgresql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:26:32.552Z"
+      },
+      {
+        "run_id": "initial_20261008_162829",
+        "engine": "postgresql",
+        "cnt": "5",
+        "ok": "5",
+        "started_at": "2026-10-08T16:28:30.158Z"
+      },
+      {
+        "run_id": "manual",
+        "engine": "postgresql",
+        "cnt": "20",
+        "ok": "20",
+        "started_at": "2026-10-08T15:44:12.580Z"
+      },
+      {
+        "run_id": "manual",
+        "engine": "mongodb",
+        "cnt": "20",
+        "ok": "20",
+        "started_at": "2026-10-08T15:33:11.787Z"
+      },
+      {
+        "run_id": "manual",
+        "engine": "mysql",
+        "cnt": "20",
+        "ok": "20",
+        "started_at": "2026-10-08T15:21:56.486Z"
+      }
+    ],
+    "초기이관_규모별": [
+      {
+        "source_count": "50000",
+        "cnt": "120"
+      },
+      {
+        "source_count": "200",
+        "cnt": "75"
+      }
+    ],
+    "etl_run_log_집계": [
+      {
+        "work_type": "etl",
+        "etl_type": "append",
+        "status_code": "OK",
+        "cnt": "24",
+        "avg_sec": "5.84"
+      },
+      {
+        "work_type": "etl",
+        "etl_type": "merge",
+        "status_code": "OK",
+        "cnt": "24",
+        "avg_sec": "7.11"
+      },
+      {
+        "work_type": "etl",
+        "etl_type": "truncate",
+        "status_code": "OK",
+        "cnt": "12",
+        "avg_sec": "6.33"
+      }
+    ],
+    "etl_기준_run_id": "etl_full_50k",
+    "컬럼변경기록": []
+  },
+  "비식별화": {
+    "비식별화코드": {
+      "D1": "해시(SHA-256)",
+      "D2": "null 처리",
+      "D3": "마스킹"
+    },
+    "마스크길이": 2,
+    "프로파일_설정": {
+      "name": "D1",
+      "email": "D2",
+      "phone": "D3"
+    },
+    "제외컬럼": [
+      "address"
+    ],
+    "etl_type": "append",
+    "비교": [
+      {
+        "id": 1,
+        "name": {
+          "원본": "user_1",
+          "코드": "D1",
+          "Python_기대값": "79b0aa0042b3c05617c378046a6553ec2cd81e9995959a6012f9b497a18ec82b",
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "email": {
+          "원본": "user_1@example.com",
+          "코드": "D2",
+          "Python_기대값": null,
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "phone": {
+          "원본": "010-0001-01",
+          "코드": "D3",
+          "Python_기대값": "01******01",
+          "Databricks_실제값": "(ETL 행 없음)"
+        }
+      },
+      {
+        "id": 2,
+        "name": {
+          "원본": "user_2",
+          "코드": "D1",
+          "Python_기대값": "d39f33d09bf080259380f4ec38f7610ba03db7c453b13e11477ec90ef53d7bcd",
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "email": {
+          "원본": "user_2@example.com",
+          "코드": "D2",
+          "Python_기대값": null,
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "phone": {
+          "원본": "010-0002-02",
+          "코드": "D3",
+          "Python_기대값": "01******02",
+          "Databricks_실제값": "(ETL 행 없음)"
+        }
+      },
+      {
+        "id": 3,
+        "name": {
+          "원본": "user_3",
+          "코드": "D1",
+          "Python_기대값": "6b902cece245553e51d0b3c0ccec459cbad0e97a9ad934e603c0b5a5814f0714",
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "email": {
+          "원본": "user_3@example.com",
+          "코드": "D2",
+          "Python_기대값": null,
+          "Databricks_실제값": "(ETL 행 없음)"
+        },
+        "phone": {
+          "원본": "010-0003-03",
+          "코드": "D3",
+          "Python_기대값": "01******03",
+          "Databricks_실제값": "(ETL 행 없음)"
+        }
+      }
+    ],
+    "일치여부": true
+  },
+  "프로파일": {
+    "프로파일수": 12,
+    "집계": {
+      "테이블": 60,
+      "append": 24,
+      "truncate": 12,
+      "merge": 24,
+      "D1": 60,
+      "D2": 60,
+      "D3": 60,
+      "exclude": 60,
+      "활성": 60
+    },
+    "주기분포": {
+      "daily": 12,
+      "weekly": 12,
+      "monthly": 9,
+      "quarterly": 9,
+      "semi_annually": 9,
+      "annually": 9
+    },
+    "목록": [
+      {
+        "파일": "mongodb_mongo_schema_1.yaml",
+        "엔진": "mongodb",
+        "스키마": "mongo_schema_1",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mongodb_mongo_schema_2.yaml",
+        "엔진": "mongodb",
+        "스키마": "mongo_schema_2",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mongodb_mongo_schema_3.yaml",
+        "엔진": "mongodb",
+        "스키마": "mongo_schema_3",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mongodb_mongo_schema_4.yaml",
+        "엔진": "mongodb",
+        "스키마": "mongo_schema_4",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mysql_mysql_schema_1.yaml",
+        "엔진": "mysql",
+        "스키마": "mysql_schema_1",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mysql_mysql_schema_2.yaml",
+        "엔진": "mysql",
+        "스키마": "mysql_schema_2",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mysql_mysql_schema_3.yaml",
+        "엔진": "mysql",
+        "스키마": "mysql_schema_3",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "mysql_mysql_schema_4.yaml",
+        "엔진": "mysql",
+        "스키마": "mysql_schema_4",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "postgresql_postgres_schema_1.yaml",
+        "엔진": "postgresql",
+        "스키마": "postgres_schema_1",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "postgresql_postgres_schema_2.yaml",
+        "엔진": "postgresql",
+        "스키마": "postgres_schema_2",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "postgresql_postgres_schema_3.yaml",
+        "엔진": "postgresql",
+        "스키마": "postgres_schema_3",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      },
+      {
+        "파일": "postgresql_postgres_schema_4.yaml",
+        "엔진": "postgresql",
+        "스키마": "postgres_schema_4",
+        "테이블수": 5,
+        "활성수": 5,
+        "등록일자": "2026-10-08",
+        "작업주기": "daily"
+      }
+    ],
+    "예시": {
+      "engine": "mysql",
+      "schema": "mysql_schema_1",
+      "registered_at": "2026-10-08",
+      "updated_at": "2026-10-08T09:10:13+09:00",
+      "schedule": {
+        "type": "daily"
+      },
+      "tables": {
+        "table_1": {
+          "columns": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ],
+          "include_columns": [],
+          "exclude_columns": [
+            "address"
+          ],
+          "deidentification": {
+            "name": "D1",
+            "email": "D2",
+            "phone": "D3"
+          },
+          "etl_type": "append",
+          "primary_key": "",
+          "schedule": {
+            "type": "daily"
+          },
+          "registered_at": "2026-10-02",
+          "active": "Y"
+        },
+        "table_2": {
+          "columns": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ],
+          "include_columns": [],
+          "exclude_columns": [
+            "description"
+          ],
+          "deidentification": {
+            "name": "D2",
+            "email": "D3",
+            "phone": "D1"
+          },
+          "etl_type": "truncate",
+          "primary_key": "",
+          "schedule": {
+            "type": "weekly",
+            "day_of_week": 0
+          },
+          "registered_at": "2026-10-02",
+          "active": "Y"
+        },
+        "table_3": {
+          "columns": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ],
+          "include_columns": [],
+          "exclude_columns": [
+            "is_active"
+          ],
+          "deidentification": {
+            "name": "D3",
+            "email": "D1",
+            "phone": "D2"
+          },
+          "etl_type": "merge",
+          "primary_key": "id",
+          "schedule": {
+            "type": "monthly",
+            "fixed_day": 1
+          },
+          "registered_at": "2026-10-02",
+          "active": "Y"
+        },
+        "table_4": {
+          "columns": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ],
+          "include_columns": [],
+          "exclude_columns": [
+            "age"
+          ],
+          "deidentification": {
+            "name": "D1",
+            "email": "D3",
+            "phone": "D2"
+          },
+          "etl_type": "merge",
+          "primary_key": "id",
+          "schedule": {
+            "type": "quarterly",
+            "fixed_day": 1
+          },
+          "registered_at": "2026-10-02",
+          "active": "Y"
+        },
+        "table_5": {
+          "columns": [
+            "id",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "age",
+            "salary",
+            "created_at",
+            "updated_at",
+            "is_active",
+            "description"
+          ],
+          "include_columns": [],
+          "exclude_columns": [
+            "salary"
+          ],
+          "deidentification": {
+            "name": "D2",
+            "email": "D1",
+            "phone": "D3"
+          },
+          "etl_type": "append",
+          "primary_key": "",
+          "schedule": {
+            "type": "semi_annually",
+            "fixed_day": 1
+          },
+          "registered_at": "2026-10-02",
+          "active": "Y"
+        }
+      }
+    }
+  },
+  "slack": {
+    "총건수": 80,
+    "성공건수": 2,
+    "실패건수": 78,
+    "종류별": [
+      "DAG완료",
+      "ETL전체요약",
+      "건너뜀",
+      "성공",
+      "실패",
+      "초기이관"
+    ],
+    "기록파일": "C:\\Users\\lee21\\OneDrive\\문서\\Default Project\\databricks-pre-test-new\\work\\slack_sent.json"
+  },
+  "실측함정": [
+    {
+      "번호": 1,
+      "구분": "rclone API",
+      "증상": "POST /sync/copy → HTTP 400 `Didn't find key \"srcFs\" in input`",
+      "원인": "rclone v1.75 는 `src`·`dst` 가 아니라 `srcFs`·`dstFs` 키를 요구한다. 구버전 문서 예시와 다르다.",
+      "조치": "요청 본문의 키를 srcFs / dstFs 로 변경."
+    },
+    {
+      "번호": 2,
+      "구분": "rclone API",
+      "증상": "복제를 시작했는데 jobid 가 없어 완료 여부를 알 수 없음",
+      "원인": "`_async: true` 가 없으면 **동기 실행**이 되어 응답이 `{}` 로 빈 객체로 돌아온다.",
+      "조치": "`_async: True` 를 넣어 jobid 를 받고, /job/status 로 폴링한다. 이것이 '셸이 아닌 API' 라는 요구사항의 실질적 이득이다."
+    },
+    {
+      "번호": 3,
+      "구분": "rclone API",
+      "증상": "GET /job/status?jobid=13 → HTTP 404 Not Found",
+      "원인": "이 엔드포인트는 GET 도 쿼리스트링도 받지 않는다.",
+      "조치": "POST + JSON body `{\"jobid\": 13}` 로 호출."
+    },
+    {
+      "번호": 4,
+      "구분": "rclone 설정",
+      "증상": "설정한 리모트 `lakehouse-seoul` 이 목록에 없음",
+      "원인": "`RCLONE_CONFIG_LAKEHOUSE_SEOUL_TYPE` 로 만드는 리모트 이름은 하이픈이 아니라 **밑줄**이 된다.",
+      "조치": "리모트 이름을 `lakehouse_seoul` 로 사용."
+    },
+    {
+      "번호": 5,
+      "구분": "AWS S3",
+      "증상": "`put_object` 가 성공했는데 S3 목록에 객체가 보이지 않음",
+      "원인": "Key 에 **버킷명까지 넣었다.** put_object 는 버킷을 Bucket 파라미터로 따로 받는다.",
+      "조치": "Key 에는 접두만 넣는다."
+    },
+    {
+      "번호": 6,
+      "구분": "성공/실패 판정",
+      "증상": "복제가 실제로는 성공했는데 '실패 12건' 으로 보고됨",
+      "원인": "rclone 결과 dict 안에 `\"오류\": 0` 이 들어 있어서 `\"오류\" in 결과` 판정이 **성공을 실패로 잡았다.**",
+      "조치": "예외 기록 키(`실패사유`)로 판정하도록 분리."
+    },
+    {
+      "번호": 7,
+      "구분": "Databricks SQL",
+      "증상": "SHOW TABLES LIKE 'x' IN schema → PARSE_SYNTAX_ERROR",
+      "원인": "Spark 문법은 `IN` 이 먼저 온다.",
+      "조치": "`SHOW TABLES IN <schema> LIKE '<pattern>'` 로 바꿨고, 스키마 전체 목록을 한 번 읽어 파이썬 쪽에서 비교한다. 테이블마다 실패하면 60회가 되므로 배치로 바꾼다."
+    },
+    {
+      "번호": 8,
+      "구분": "Databricks DDL",
+      "증상": "CREATE SCHEMA `workspace.mysql` → INVALID_NAME_FORMAT (이름에 마침표 불가)",
+      "원인": "두 단계 이름을 통째로 역따옴표로 감싸면 **하나의 식별자**로 읽힌다.",
+      "조치": "단계별로 감싼다: `workspace`.`mysql`."
+    },
+    {
+      "번호": 9,
+      "구분": "Databricks DDL",
+      "증상": "DROP TABLE IF EXISTS 직후 CREATE → TABLE_OR_VIEW_ALREADY_EXISTS, SHOW 에도 안 보임",
+      "원인": "메타데이터가 즉시 정리되지 않는다.",
+      "조치": "`CREATE OR REPLACE` 사용."
+    },
+    {
+      "번호": 10,
+      "구분": "PostgreSQL",
+      "증상": "CREATE SCHEMA pg_schema_1 → unacceptable schema name",
+      "원인": "`pg_` 접두사는 시스템 스키마용으로 예약되어 있다.",
+      "조치": "`postgres_schema_1` 로 변경."
+    },
+    {
+      "번호": 11,
+      "구분": "MongoDB / parquet",
+      "증상": "ArrowInvalid: Could not convert ObjectId ... did not recognize Python value type",
+      "원인": "MongoDB `_id`(ObjectId) 를 parquet 로 바꿀 수 없다.",
+      "조치": "MongoDB 문서에는 정수 `id` 를 별도로 두고 `_id` 는 제외. 덕분에 세 엔진이 같은 컬럼 구성을 갖는다."
+    },
+    {
+      "번호": 12,
+      "구분": "MongoDB",
+      "증상": "list_database_names() 결과가 비었거나 IndexError",
+      "원인": "관리용 DB 이름을 명시하지 않으면 빈 문자열이 섞인다.",
+      "조치": "테스트 접두(`mongo_schema_`)로 필터링."
+    },
+    {
+      "번호": 13,
+      "구분": "ETL 감사 로그",
+      "증상": "NOT NULL constraint violated for column: ended_at",
+      "원인": "`process_table` 의 조기 반환 경로들이 종료 시각을 채우지 않았다.",
+      "조치": "`try/finally` 로 종료 시각을 반드시 채우도록 구조 변경."
+    },
+    {
+      "번호": 14,
+      "구분": "Windows 실행 환경",
+      "증상": "인라인 `python -c \"...\"` 에서 따옴표·한글이 깨짐",
+      "원인": "PowerShell 의 인용 규칙 + cp949 콘솔 인코딩.",
+      "조치": "긴 명령은 전부 스크립트 파일로 만들고, stdout 을 UTF-8 로 reconfigure 한다."
+    },
+    {
+      "번호": 15,
+      "구분": "쿼터",
+      "증상": "system.jobs.history 조회가 수 분 이상 걸림",
+      "원인": "Free Edition 에서 정렬된 잡 이력 조회가 매우 느리다.",
+      "조치": "기본 조회에서 제외하고, 필요할 때만 명시적으로 요청."
+    },
+    {
+      "번호": 16,
+      "구분": "쿼터",
+      "증상": "이전 프로젝트 잔여 테이블 때문에 신규 테스트가 막힘",
+      "원인": "Free Edition 은 표 개수와 일일 쿼리 수에 한도가 있다.",
+      "조치": "테이블별로 DROP 하지 않고 스키마 단위 CASCADE DROP 으로 정리한다(272개를 44회가로 처리)."
+    }
+  ]
+}

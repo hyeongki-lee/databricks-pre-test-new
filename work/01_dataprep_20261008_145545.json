@@ -1,0 +1,518 @@
+{
+  "시작시각": "2026-10-08T14:55:37+09:00",
+  "엔진별": {
+    "mysql": {
+      "스키마": {
+        "mysql_schema_1": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_1\\table_1\\_chk.json",
+              "소요초": 0.9
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_1\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_1\\table_3\\_chk.json",
+              "소요초": 0.2
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_1\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_1\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        },
+        "mysql_schema_2": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_2\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_2\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_2\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_2\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_2\\table_5\\_chk.json",
+              "소요초": 0.2
+            }
+          },
+          "총건수": 25
+        },
+        "mysql_schema_3": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_3\\table_1\\_chk.json",
+              "소요초": 0.2
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_3\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_3\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_3\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_3\\table_5\\_chk.json",
+              "소요초": 0.2
+            }
+          },
+          "총건수": 25
+        },
+        "mysql_schema_4": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_4\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_4\\table_2\\_chk.json",
+              "소요초": 0.2
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_4\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_4\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mysql\\mysql_schema_4\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        }
+      },
+      "테이블수": 20,
+      "총건수": 100,
+      "총파일": 20,
+      "총크기": 76200,
+      "소요초": 4.5
+    },
+    "mongodb": {
+      "스키마": {
+        "mongo_schema_1": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_1\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_1\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_1\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_1\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_1\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        },
+        "mongo_schema_2": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_2\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_2\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_2\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_2\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_2\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        },
+        "mongo_schema_3": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_3\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_3\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_3\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_3\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_3\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        },
+        "mongo_schema_4": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_4\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_4\\table_2\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_4\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_4\\table_4\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\mongodb\\mongo_schema_4\\table_5\\_chk.json",
+              "소요초": 0.1
+            }
+          },
+          "총건수": 25
+        }
+      },
+      "테이블수": 20,
+      "총건수": 100,
+      "총파일": 20,
+      "총크기": 76200,
+      "소요초": 2.1
+    },
+    "postgresql": {
+      "스키마": {
+        "postgres_schema_1": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_1\\table_1\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_1\\table_2\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_1\\table_3\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_1\\table_4\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_1\\table_5\\_chk.json",
+              "소요초": 0.0
+            }
+          },
+          "총건수": 25
+        },
+        "postgres_schema_2": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_2\\table_1\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_2\\table_2\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_2\\table_3\\_chk.json",
+              "소요초": 0.1
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_2\\table_4\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_2\\table_5\\_chk.json",
+              "소요초": 0.0
+            }
+          },
+          "총건수": 25
+        },
+        "postgres_schema_3": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_3\\table_1\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_3\\table_2\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_3\\table_3\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_3\\table_4\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_3\\table_5\\_chk.json",
+              "소요초": 0.0
+            }
+          },
+          "총건수": 25
+        },
+        "postgres_schema_4": {
+          "테이블": {
+            "table_1": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_4\\table_1\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_2": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_4\\table_2\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_3": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_4\\table_3\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_4": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_4\\table_4\\_chk.json",
+              "소요초": 0.0
+            },
+            "table_5": {
+              "건수": 5,
+              "파일수": 1,
+              "총크기": 3810,
+              "chk": "C:\\Users\\lee21\\lakehouse\\pretest-data\\postgresql\\postgres_schema_4\\table_5\\_chk.json",
+              "소요초": 0.0
+            }
+          },
+          "총건수": 25
+        }
+      },
+      "테이블수": 20,
+      "총건수": 100,
+      "총파일": 20,
+      "총크기": 76200,
+      "소요초": 1.0
+    }
+  },
+  "총테이블": 60,
+  "총건수": 300,
+  "총파일": 60,
+  "총크기": 228600,
+  "종료시각": "2026-10-08T14:55:45+09:00",
+  "총소요초": 8.0
+}

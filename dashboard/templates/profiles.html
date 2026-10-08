@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block body %}
+<h2 style="font-size:16px;margin:0 0 12px">프로파일 {{ profiles|length }}개</h2>
+
+<div class="card">
+  <table>
+    <tr><th>엔진</th><th>스키마</th><th>테이블</th><th>활성(Y)</th>
+        <th>처리종류 분포</th><th>작업주기</th><th>등록일자</th><th>파일</th><th></th></tr>
+    {% for p in profiles %}
+    <tr>
+      <td>{{ p.엔진 }}</td>
+      <td>{{ p.스키마 }}</td>
+      <td>{{ p.테이블수 }}</td>
+      <td class="{% if p.활성수 == p.테이블수 and p.테이블수 %}ok{% else %}mut{% endif %}">
+          {{ p.활성수 }}</td>
+      <td class="mut">—</td>
+      <td>{{ p.작업주기 }}</td>
+      <td class="mut">{{ p.등록일자 }}</td>
+      <td><code>{{ p.파일 }}</code></td>
+      <td><a href="/profiles/{{ p.엔진 }}/{{ p.스키마 }}">편집</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="mut">등록된 프로파일이 없습니다.</td></tr>
+    {% endfor %}
+  </table>
+  <p class="mut" style="margin:10px 0 0;font-size:12.5px">
+    프로파일은 데이터베이스 행이 아니라 <code>config/profiles/&lt;엔진&gt;_&lt;스키마&gt;.yaml</code>
+    파일로 관리됩니다. 형상관리(Git) 대상입니다.</p>
+</div>
+{% endblock %}

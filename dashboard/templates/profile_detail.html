@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block body %}
+{% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ category }}">{{ message }}</div>
+{% endfor %}
+
+<h2 style="font-size:16px;margin:0 0 4px">{{ engine }} · {{ schema }}</h2>
+<p class="mut" style="margin:0 0 14px">
+  파일 <code>config/profiles/{{ engine }}_{{ schema }}.yaml</code> ·
+  스키마 요약: 테이블 {{ summary.테이블수 }}개 · 활성 {{ summary.활성 }}개 ·
+  {{ summary.작업주기 }} · 등록일 {{ summary.등록일자 }}</p>
+
+<form method="post" action="/profiles/{{ engine }}/{{ schema }}/save">
+<div class="card">
+  <h3 style="margin-top:0">스키마 기본값</h3>
+  <label>작업주기
+    <select name="schedule_type">
+      {% for code, label in schedule_codes.items() %}
+      <option value="{{ code }}"
+        {% if document.schedule.type == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select></label>
+  <label style="margin-left:14px">등록일자
+    <input type="date" name="registered_at"
+           value="{{ document.get('registered_at', '') }}"></label>
+</div>
+
+{% for table, entry in document.get('tables', {}).items() %}
+{% set live_cols = live.get(table, []) %}
+{% set live_names = live_cols | map(attribute='name') | list %}
+{% set profile_cols = entry.get('columns', []) %}
+{% set missing = profile_cols | reject('in', live_names) | list %}
+{% set added = live_names | reject('in', profile_cols) | list %}
+<fieldset>
+  <legend>
+    {{ table }}
+    {% if missing %}<span class="ng" style="font-weight:400">
+      · 원천에서 삭제됨 {{ missing|length }}개</span>{% endif %}
+    {% if added %}<span style="color:var(--warn);font-weight:400">
+      · 원천에 신규 {{ added|length }}개</span>{% endif %}
+  </legend>
+
+  <input type="hidden" name="table_name" value="{{ table }}">
+
+  <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:9px">
+    <label>처리 종류
+      <select name="etl_type__{{ table }}">
+        {% for code, label in load_types.items() %}
+        <option value="{{ code }}"
+          {% if entry.get('etl_type') == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select></label>
+    {% if entry.get('etl_type') == 'merge' or loop.index0 == 0 %}
+    <label>기본키
+      <input type="text" name="pk__{{ table }}" size="8"
+             value="{{ entry.get('primary_key', '') }}"
+             placeholder="id"></label>
+    {% endif %}
+    <label>활성
+      <select name="active__{{ table }}">
+        <option value="N" {% if entry.get('active') != 'Y' %}selected{% endif %}>N</option>
+        <option value="Y" {% if entry.get('active') == 'Y' %}selected{% endif %}>Y</option>
+      </select></label>
+    <label>작업주기
+      <select name="schedule_type__{{ table }}">
+        {% for code, label in schedule_codes.items() %}
+        <option value="{{ code }}"
+          {% if (entry.get('schedule') or {}).get('type') == code %}selected{% endif %}>
+          {{ label }}</option>
+        {% endfor %}
+      </select></label>
+    <label>요일
+      <select name="dow__{{ table }}">
+        {% for code, ko in zip(weekdays, weekday_ko) %}
+        <option value="{{ loop.index0 }}"
+          {% if (entry.get('schedule') or {}).get('day_of_week') == loop.index0 %}selected{% endif %}>
+          {{ ko }}</option>
+        {% endfor %}
+      </select></label>
+    <label>고정일(매월)
+      <input type="number" name="fixed_day__{{ table }}" min="1" max="31" size="3"
+             value="{{ (entry.get('schedule') or {}).get('fixed_day', '') }}"></label>
+    <label>등록일
+      <input type="date" name="registered__{{ table }}"
+             value="{{ entry.get('registered_at', '') }}"></label>
+  </div>
+
+  <table>
+    <tr><th style="width:170px">컬럼</th><th style="width:130px">원천 타입</th>
+        <th style="width:90px">include</th><th style="width:110px">exclude</th>
+        <th style="width:130px">비식별화</th><th>상태</th></tr>
+    {% for col in profile_cols %}
+    {% set excluded = col in (entry.get('exclude_columns') or []) %}
+    {% set deid = (entry.get('deidentification') or {}).get(col, '') %}
+    <tr>
+      <td><label style="display:flex;gap:6px;align-items:center">
+        <input type="checkbox" name="columns__{{ table }}" value="{{ col }}" checked>
+        <code>{{ col }}</code></label></td>
+      <td class="mut">
+        {% for meta in live_cols %}{% if meta.name == col %}{{ meta.type }}{% endif %}{% endfor %}
+      </td>
+      <td><input type="checkbox" name="include__{{ table }}" value="{{ col }}"></td>
+      <td><input type="checkbox" name="exclude__{{ table }}" value="{{ col }}"
+                 {% if excluded %}checked{% endif %}></td>
+      <td><select name="deid__{{ table }}__{{ col }}">
+        <option value="">—</option>
+        {% for code, label in deid_codes.items() %}
+        <option value="{{ code }}" {% if deid == code %}selected{% endif %}>{{ code }} {{ label }}</option>
+        {% endfor %}
+      </select></td>
+      <td class="{% if col in missing %}ng{% else %}mut{% endif %}">
+        {% if col in missing %}원천에서 삭제됨 → ETL 이 null as 로 처리{% else %}정상{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+
+    {% for col in added %}
+    <tr style="background:#fffbe9">
+      <td><code>{{ col }}</code> <span class="mut">(신규)</span></td>
+      <td class="mut">
+        {% for meta in live_cols %}{% if meta.name == col %}{{ meta.type }}{% endif %}{% endfor %}</td>
+      <td class="mut">—</td><td class="mut">—</td><td class="mut">—</td>
+      <td style="color:var(--warn)">원천에만 있음 → 프로파일에 등록해야 적재됩니다</td>
+    </tr>
+    {% endfor %}
+  </table>
+</fieldset>
+{% endfor %}
+
+<div class="card">
+  <button type="submit">YAML 저장</button>
+  <a href="/" class="mut" style="margin-left:14px">← 개요로</a>
+  <p class="mut" style="margin:10px 0 0;font-size:12.5px">
+    include 는 공집합이면 <code>columns</code>(등록 시점 스냅샷)를 기준선으로 쓰고,
+    exclude 는 항상 마지막에 적용됩니다. 원천에만 있는 컬럼은 자동으로 반영되지 않습니다.</p>
+</div>
+</form>
+{% endblock %}
