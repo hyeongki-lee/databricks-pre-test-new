@@ -114,6 +114,53 @@ Auto Loader 가 가장 느린 단계다. Databricks 관리형 테이블 생성 +
 건수 대조가 테이블마다 반복되기 때문이다. Free Edition 쿼터에 걸리지 않도록
 `scripts/watchdog.py` 로 감시하며 돈다.
 
+## 대시보드 보는 방법
+
+대시보드는 두 가지 형태가 있다.
+
+### 1. GitHub Pages — 읽기 전용 (아무 브라우저나 조회)
+
+| 주소 | 내용 |
+|---|---|
+| <https://hyeongki-lee.github.io/databricks-pre-test-new/docs/dashboard.html> | ETL 대시보드 (정적 스냅샷) |
+| <https://hyeongki-lee.github.io/databricks-pre-test-new/manual/databricks-pre-test-manual.html> | 상세 검증 매뉴얼 |
+
+GitHub Pages 는 정적 파일만 제공해서 Python 을 실행하지 못한다. 그래서
+프로파일 YAML 12개를 읽어 **읽기 전용 HTML** 로 굽는다.
+스키마 12개 · 테이블 60개의 ETL 유형 · PK · 주기 · 활성 플래그 · 원천 건수 ·
+적재/제외 컬럼 · 비식별화 배분, 그리고 Databricks 감사 테이블 실측이 담긴다.
+
+**안 되는 것** (화면에도 명시돼 있다)
+- 원천 DB · Databricks 실시간 조회
+- 컬럼 체크박스로 `exclude_columns` 저장
+- 신규 테이블 등록
+
+재생성: `python scripts/build_dashboard_snapshot.py`
+
+### 2. 로컬 — 실시간 (조회 + 저장)
+
+```powershell
+cd C:\Users\lee21\OneDrive\문서\Default Project\databricks-pre-test-new
+C:\Users\lee21\AppData\Local\Programs\Python\Python312\python.exe `
+    dashboard\app.py --port 8540
+```
+
+브라우저에서 <http://127.0.0.1:8540>
+
+DB 컨테이너(MySQL 3306 · MongoDB 27017 · PostgreSQL 5432)가 떠 있어야
+실시간 조회가 된다. 없으면 `docker compose up -d` 로 띄운다.
+
+| 라우트 | 용도 |
+|---|---|
+| `GET /` | 개요 — 프로파일 · Databricks 통계 · 원천 현황 |
+| `GET /profiles` | 프로파일 목록 |
+| `GET /profiles/<e>/<s>` | 스키마 상세 (컬럼 편집 · 비식별화 · 주기) |
+| `POST /profiles/<e>/<s>/save` | YAML 저장 |
+| `GET /builder` | ETL 빌더 (신규 테이블 등록) |
+| `GET /columns` | 전체 컬럼 현황 |
+| `GET /table/add` | 신규 테이블 등록 |
+| `GET /api/profiles` · `GET /api/stats` | JSON |
+
 ## 검증 시나리오
 
 | 시나리오 | 명령 | 판정 |
