@@ -40,6 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from flask import (Flask, abort, flash, jsonify, redirect, render_template,
                    request, url_for)
 
+import cache                                   # noqa: E402
 import profile_editor as editor                # noqa: E402
 from lib import config as cfg                  # noqa: E402
 from lib import dbx                            # noqa: E402
@@ -197,17 +198,32 @@ def recent_logs(schema: str, limit: int = 20) -> list[dict]:
 
 @app.route("/")
 def index():
-    """Overview: profiles, live discovery, Databricks statistics."""
-    found = discover()
+    """Overview: profiles, live discovery, Databricks statistics.
+
+    Measured: doing the live queries on every render took **25 seconds**
+    (three source databases — 60 tables of columns and counts — plus
+    Databricks), and the first request exceeded 30 seconds on connection
+    setup. That is slow enough to look broken.
+
+    The requirement is to read from the databases rather than trust stored
+    metadata, so the values are not dropped. They are simply reused for a
+    short window, and the page states how old the numbers are.
+    """
+    found = cache.discovery_cache.get_or_refresh(discover)
+    statistics = cache.stats_cache.get_or_refresh(databricks_stats)
+
     return render_template(
         "index.html",
         profiles=profile_mod.list_all(),
         discovery=found,
-        stats=databricks_stats(),
+        stats=statistics,
         engines=sources_mod.ENGINES,
         deid_codes=DEID_CODES,
         load_types=LOAD_TYPES,
         schedule_codes=SCHEDULE_CODES,
+        discovery_age=int(cache.discovery_cache.age()),
+        discovery_error=cache.discovery_cache.error(),
+        stats_error=cache.stats_cache.error(),
     )
 
 
@@ -503,8 +519,46 @@ def api_profiles():
 
 @app.route("/api/stats")
 def api_stats():
-    """JSON view of the Databricks statistics."""
+    """JSON view of the Databricks statistics.
+
+    Deliberately **bypasses** the cache. This endpoint exists so a script can
+    ask for the current truth, and a stale value would defeat that purpose.
+    The cache serves the human-facing page, not this.
+    """
     return jsonify(databricks_stats())
+
+
+# ---------------------------------------------------------------------------
+# Cache warm-up
+# ---------------------------------------------------------------------------
+
+def warm_caches() -> None:
+    """Fill the slow overview caches in the background.
+
+    Measured: the first render of `/` costs about 45 seconds — connection
+    setup to three source databases plus Databricks. Warming at startup moves
+    that cost off the first visitor's request.
+
+    It runs in a thread so the server starts listening immediately; a failure
+    is logged and simply leaves the cache empty, which is the same state the
+    page handles today.
+    """
+    import threading
+
+    def run() -> None:
+        for label, producer, store in (
+            ("원천 조회", discover, cache.discovery_cache),
+            ("Databricks 통계", databricks_stats, cache.stats_cache),
+        ):
+            try:
+                store.get_or_refresh(producer)
+                print(f"[예열] {label} 완료")
+            except Exception as exc:            # noqa: BLE001
+                print(f"[예열] {label} 실패 — {type(exc).__name__}: "
+                      f"{str(exc)[:120]}")
+                return
+
+    threading.Thread(target=run, daemon=True, name="cache-warmup").start()
 
 
 # ---------------------------------------------------------------------------
@@ -516,6 +570,9 @@ if __name__ == "__main__":
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8540)
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--예열", dest="warm", action="store_true", default=True,
+                        help="시작과 동시에 overview 캐시를 채운다")
+    parser.add_argument("--예열없음", dest="warm", action="store_false")
     args = parser.parse_args()
 
     profiles_dir = cfg.profile_folder()
@@ -523,4 +580,7 @@ if __name__ == "__main__":
     print(f"프로파일 폴더 : {profiles_dir}")
     print(f"템플릿 폴더  : {templates_dir}")
     print(f"대시보드      : http://{args.host}:{args.port}")
+    if args.warm:
+        print("overview 캐시 예열을 시작합니다 (백그라운드)")
+        warm_caches()
     app.run(host=args.host, port=args.port, debug=args.debug)
