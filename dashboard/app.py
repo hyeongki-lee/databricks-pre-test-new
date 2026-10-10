@@ -224,6 +224,7 @@ def index():
         discovery_age=int(cache.discovery_cache.age()),
         discovery_error=cache.discovery_cache.error(),
         stats_error=cache.stats_cache.error(),
+        discovery_refreshing=cache.discovery_cache.refreshing(),
     )
 
 
@@ -406,7 +407,11 @@ def builder():
                            deid_codes=DEID_CODES,
                            load_types=LOAD_TYPES,
                            schedule_codes=SCHEDULE_CODES,
-                           live=discover())
+                           # Measured: /builder took 11.5s because it ran the full
+                           # live discovery on every render. It shows the same data as
+                           # the overview, so it reuses that cache.
+                           live=cache.discovery_cache.get_or_refresh(
+                                 discover))
 
 
 @app.route("/builder/register", methods=["POST"])
@@ -446,7 +451,19 @@ def builder_register():
 
 @app.route("/columns")
 def columns():
-    """Column-level view across every schema."""
+    """Column-level view across every schema.
+
+    Measured: this walked three source databases and took about 6
+    seconds on every render. The inventory only changes when a schema
+    changes, so it is built through the same cache.
+    """
+    return render_template("columns.html",
+                           matrix=cache.column_matrix_cache.get_or_refresh(
+                               build_column_matrix))
+
+
+def build_column_matrix() -> list:
+    """Column inventory across every schema, read live."""
     matrix = []
     for engine in sources_mod.ENGINES:
         try:

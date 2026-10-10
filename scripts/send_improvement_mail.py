@@ -3,12 +3,11 @@
 
 보내는 내용
 ----------
-  1. ETL 대시보드 프로파일 편집 기능 개선 내용
-  2. 매뉴얼 14장 보완 내역
-  3. 발견·수정한 결함 3건
+  1. 프로파일 편집 기능 개선 (YAML 원본 읽기·고치기·저장, 변경 요약, 되돌리기)
+  2. 대시보드 응답 시간 개선 (25초 → 0초)
+  3. 작업 중 발견·수정한 결함
 
-매뉴얼 전체를 다시 첨부하지는 않는다. 이전 메일에 이미 링크를 보냈고,
-이번에는 **변경된 것만** 알리는 편이 읽기 쉽다.
+매뉴얼은 이미 링크가 돌아가고 있으니 첨부하지 않고 변경분만 알린다.
 """
 from __future__ import annotations
 
@@ -29,13 +28,22 @@ REPO = "databricks-pre-test-new"
 REPO_URL = f"https://github.com/{OWNER}/{REPO}"
 PAGES = f"https://{OWNER}.github.io/{REPO}"
 MANUAL = f"{PAGES}/manual/databricks-pre-test-manual.html"
-DASHBOARD = f"{PAGES}/docs/dashboard.html"
 
 TO = "mercy.lee@kakaopaycorp.com"
 ENV_CANDIDATES = (Path(r"C:\Users\lee21\lakehouse\.env"), ROOT / ".env")
 
-DASH_DIR = ROOT / "work" / "dashboard"
-LOG = DASH_DIR / "dashboard.err.log"
+DASH = "http://127.0.0.1:8540"
+LOG = ROOT / "work" / "dashboard" / "dashboard.err.log"
+
+ROUTES = [
+    ("개요", "/"),
+    ("프로파일 목록", "/profiles"),
+    ("스키마 상세 (체크박스)", "/profiles/mysql/mysql_schema_1"),
+    ("YAML 원본 편집", "/profiles/mysql/mysql_schema_1/raw"),
+    ("컬럼 현황", "/columns"),
+    ("ETL 빌더", "/builder"),
+    ("신규 테이블", "/table/add"),
+]
 
 
 def load_env() -> dict[str, str]:
@@ -52,45 +60,43 @@ def load_env() -> dict[str, str]:
     return env
 
 
-def live_check() -> list[tuple[str, str]]:
-    """Report the live dashboard's route health, if it is up."""
-    routes = [
-        ("개요", "/"),
-        ("프로파일 목록", "/profiles"),
-        ("스키마 상세", "/profiles/mysql/mysql_schema_1"),
-        ("YAML 원본 편집", "/profiles/mysql/mysql_schema_1/raw"),
-        ("컬럼 현황", "/columns"),
-        ("ETL 빌더", "/builder"),
-        ("신규 테이블", "/table/add"),
-    ]
-    rows: list[tuple[str, str]] = []
-    for label, path in routes:
+def check_routes() -> list[tuple[str, str, float]]:
+    """HTTP status and elapsed seconds for each route."""
+    import time
+    rows: list[tuple[str, str, float]] = []
+    for label, path in ROUTES:
+        start = time.time()
         try:
-            with urllib.request.urlopen(f"http://127.0.0.1:8540{path}",
-                                        timeout=30) as response:
-                rows.append((label, f"HTTP {response.status}"))
+            with urllib.request.urlopen(f"{DASH}{path}", timeout=120) as r:
+                rows.append((label, f"HTTP {r.status}", time.time() - start))
         except Exception as exc:                # noqa: BLE001
-            rows.append((label, f"미응답 ({type(exc).__name__})"))
+            rows.append((label, f"미응답 ({type(exc).__name__})",
+                         time.time() - start))
     return rows
 
 
-def error_tail() -> str:
+def run_editor_test() -> str:
+    """Run the editor test and summarise the tail."""
+    import subprocess
+
+    python = sys.executable
+    script = ROOT / "scripts" / "test_profile_editor.py"
+    result = subprocess.run([python, str(script)], cwd=ROOT,
+                            capture_output=True, text=True,
+                            encoding="utf-8", errors="replace", timeout=900)
+    for line in reversed((result.stdout or "").splitlines()):
+        if "통과" in line and "/" in line:
+            return line.strip()
+    return "실행 결과 확인 못함"
+
+
+def error_line() -> str:
     if not LOG.exists():
-        return "대시보드 로그 파일이 없습니다"
-    lines = [ln for ln in LOG.read_text(encoding="utf-8",
-                                        errors="replace").splitlines()
-             if "ERROR" in ln or "Traceback" in ln]
-    return lines[-1] if lines else "에러 없음"
-
-
-def test_result() -> dict:
-    path = ROOT / "work" / "editor_test_result.json"
-    if path.exists():
-        try:
-            return json.loads(path.read_text(encoding="utf-8"))
-        except Exception:                       # noqa: BLE001
-            pass
-    return {"통과": "10", "전체": "10"}
+        return "로그 파일 없음"
+    hits = [ln for ln in LOG.read_text(encoding="utf-8",
+                                       errors="replace").splitlines()
+            if "ERROR" in ln or "Traceback" in ln]
+    return hits[-1].strip()[:110] if hits else "에러 없음"
 
 
 def row(label: str, value: str, note: str = "") -> str:
@@ -111,11 +117,12 @@ BODY = """<!DOCTYPE html>
   <div style="background:#fff;border:1px solid #dde2e8;border-radius:10px;
               padding:24px 26px">
     <h1 style="margin:0 0 6px;font-size:20px">
-      ETL 대시보드 — 프로파일 편집 기능 개선</h1>
+      ETL 대시보드 — 프로파일 편집 · 응답 시간 개선</h1>
     <p style="margin:0 0 18px;color:#5a6674;font-size:14px;line-height:1.75">
-      지적해 주신 "프로파일 편집이 안 열리고 YAML 파일만 열린다" 문제를
-      고쳤습니다. 이제 <b>읽고 · 고치고 · 저장</b>이 대시보드 안에서
-      끝납니다. 저장하면 무엇이 바뀌었는지까지 보여주고, 되돌릴 수 있습니다.</p>
+      "프로파일 편집이 안 열리고 YAML 파일만 열린다" 는 지적을 고쳤습니다.
+      이제 <b>읽고 · 고치고 · 저장</b>이 대시보드 안에서 끝나고,
+      저장하면 무엇이 바뀌었는지 보여주며 되돌릴 수 있습니다.
+      함께 발견한 개요 화면의 느린 응답도 고쳤습니다.</p>
 
     <div style="font-weight:bold;font-size:14px;margin:0 0 10px">
       1. 편집 방법을 두 갈래로 명확히 분리</div>
@@ -162,11 +169,42 @@ BODY = """<!DOCTYPE html>
 table_1: 기본키 '-' → 'id'
 table_2: 제외 추가 ['name']
 table_2: 활성 Y → N
-table_2: 비식별화 {{'name': 'D1'}} → {{'name': 'D3'}}</pre>
+table_2: 비식별화 {'name': 'D1'} → {'name': 'D3'}</pre>
+
+    <div style="font-weight:bold;font-size:14px;margin:0 0 10px">
+      4. 대시보드 응답 시간 — 25초에서 0초로</div>
+    <p style="margin:0 0 10px;font-size:13.5px;line-height:1.8">
+      개요 페이지가 원천 DB 3곳(테이블 60개의 컬럼·건수)과 Databricks 를
+      매번 새로 조회해 <b>25초</b>, 첫 요청은 45초까지 걸렸습니다.
+      라우트 점검 중 30초 제한에 타임아웃을 받아 실제로 죽은 것도 확인했습니다.</p>
+    <table cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;font-size:13px;border:1px solid #ddd;
+                  width:100%;margin-bottom:10px">
+      <tr style="background:#eef2f6">
+        <td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:bold">처리</td>
+        <td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:bold;text-align:right">소요</td>
+      </tr>
+      <tr><td style="padding:6px 12px;border-bottom:1px solid #eee">수정 전 · 화면마다 새로 조회</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right">25초 (첫 요청 45초)</td></tr>
+      <tr><td style="padding:6px 12px;border-bottom:1px solid #eee">TTL 캐시 적용 (원천 120초 · 통계 90초)</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right">0초</td></tr>
+      <tr><td style="padding:6px 12px">시작 시 백그라운드 예열 추가</td>
+          <td style="padding:6px 12px;text-align:right;font-weight:bold">첫 요청도 0초</td></tr>
+    </table>
+    <div style="border-left:4px solid #1f4e9c;background:#f2f7fd;padding:12px 15px;
+                border-radius:0 8px 8px 0;margin:0 0 18px;font-size:13.5px;line-height:1.8">
+      캐시를 넣으면서 지킨 것<br>
+      <b>① 값의 신선도를 숨기지 않는다</b> — 화면에 "N초 전에 조회한 값을
+      재사용하고 있습니다" 를 그대로 적는다.<br>
+      <b>② 조회가 실패하면 화면을 비우지 않는다</b> — 이전 값을 유지하고
+      실패 사유를 함께 보여준다.<br>
+      <b>③ <code>/api/stats</code> 는 캐시를 우회한다</b> — 스크립트가
+      <i>현재 값</i> 을 얻으려고 쓰는 곳이므로 오래된 값을 주면
+      목적에 어긋난다. 캐시는 사람용 페이지에만 적용한다.</div>
 
     <div style="border-left:4px solid #b3261e;background:#fdf1f0;padding:13px 16px;
                 border-radius:0 8px 8px 0;margin:0 0 18px;font-size:13.5px;line-height:1.8">
-      <b>작업 중 잡은 실제 결함 3건</b>
+      <b>작업 중 발견·고친 결함</b>
       <ol style="margin:7px 0 0;padding-left:20px">
         <li><b>YAML 편집에서 주석이 사라지던 문제</b> — 저장 함수가 dict 를
             다시 직렬화하는 과정에서 모든 주석을 버렸다. "이 컬럼을 제외한
@@ -174,36 +212,30 @@ table_2: 비식별화 {{'name': 'D1'}} → {{'name': 'D3'}}</pre>
             <b>텍스트를 그대로 기록</b>하도록 별도 처리했다.</li>
         <li><b>변경 요약이 항상 "새로 등록" 으로만 나오던 문제</b> — 존재 여부
             검사 대상을 잘못 잡아 모든 테이블이 신규로 보고됐다. 단위 검증
-            8종을 만들어 같은 실수를 막았다.</li>
-        <li><b>되돌리기용 백업 파일이 형상관리 대상이 될 뻔한 문제</b> —
+            8종을 만들어 막았다.</li>
+        <li><b>되돌리기용 백업이 형상관리 대상이 될 뻔한 문제</b> —
             <code>.gitignore</code> 로 제외했다.</li>
       </ol>
     </div>
 
     <div style="font-weight:bold;font-size:14px;margin:0 0 10px">
-      4. 자동 검증</div>
-    <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;
-           font-size:13px;border:1px solid #ddd">
-      {test_row}
-    </table>
-    <p style="margin:8px 0 18px;color:#5a6674;font-size:13px">
-      재현 : <code>python scripts/test_profile_editor.py</code>
-      (대시보드가 8540 에 떠 있어야 한다)</p>
-
-    <div style="font-weight:bold;font-size:14px;margin:0 0 10px">
-      5. 대시보드 라우트 현재 상태</div>
-    <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;
-           font-size:13px;border:1px solid #ddd">
+      5. 자동 검증과 라우트 상태</div>
+    <p style="margin:0 0 8px;font-size:13.5px">
+      프로파일 편집 검증 : <b>{test_line}</b><br>
+      재현 : <code>python scripts/test_profile_editor.py</code></p>
+    <table cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;font-size:13px;border:1px solid #ddd;
+                  width:100%">
       {route_rows}
     </table>
-    <p style="margin:8px 0 18px;color:#5a6674;font-size:13px">
-      최근 로그 : {error_line}</p>
+    <p style="margin:8px 0 18px;color:#5a6674;font-size:12.5px">
+      최근 서버 로그 : {error_line}</p>
 
     <div style="border-left:4px solid #1f4e9c;background:#f2f7fd;padding:13px 16px;
                 border-radius:0 8px 8px 0;margin:0 0 18px;font-size:13.5px;line-height:1.8">
       <b>매뉴얼 14장 보완</b><br>
-      편집 2경로 표 · 저장 안전장치 5단계 · 변경 요약 예시 ·
-      잡은 결함 3건을 그대로 실었다.
+      14.1 편집 2경로 · 14.2 저장 안전장치 5단계 · 14.3 응답 시간(캐시·예열) ·
+      14.4 변경 요약 예시 · 잡은 결함을 그대로 실었다.
       <a href="{manual}" style="color:#0b4f9e">매뉴얼 열기 →</a></div>
 
     <a href="{manual}"
@@ -215,7 +247,7 @@ table_2: 비식별화 {{'name': 'D1'}} → {{'name': 'D3'}}</pre>
               text-decoration:none;font-size:14px">GitHub 저장소</a>
 
     <p style="margin:18px 0 0;color:#5a6674;font-size:13px;line-height:1.8">
-      로컬 실시간 대시보드는 <code>http://127.0.0.1:8540</code> 입니다.
+      로컬 실시간 대시보드는 <code>{dash}</code> 입니다.
       GitHub Pages 는 정적만 제공하므로 편집 기능은 로컬에서만 동작합니다.
       <br>⚠ 남은 요청 — Slack Incoming Webhook URL 이 Git 이력에 올라간 적이
       있어 <b>Slack 에서 해당 웹훅을 삭제하고 새로 만들어 주십시오.</b></p>
@@ -243,49 +275,52 @@ def main() -> int:
         print(f"누락된 환경값: {', '.join(missing)}")
         return 2
 
-    result = test_result()
-    test_row = (
-        row("프로파일 편집 자동 검증", f"{result.get('통과')} / {result.get('전체')}",
-            "전 항목 통과"))
+    print("라우트 점검 …")
+    routes = check_routes()
+    for label, state, seconds in routes:
+        print(f"  {state:22s} {seconds:5.1f}초  {label}")
 
-    routes = live_check()
-    route_rows = "".join(row(label, state) for label, state in routes)
-    error_line = error_tail()
+    test_line = run_editor_test()
+    print(f"편집 검증 : {test_line}")
 
-    html = (BODY.replace("{test_row}", test_row)
-                .replace("{route_rows}", route_rows)
-                .replace("{error_line}", error_line)
+    route_rows = "".join(
+        row(label, state, f"{seconds:.1f}초") for label, state, seconds in routes)
+
+    html = (BODY.replace("{route_rows}", route_rows)
+                .replace("{test_line}", test_line)
+                .replace("{error_line}", error_line())
                 .replace("{manual}", MANUAL)
                 .replace("{repo}", REPO_URL)
+                .replace("{dash}", DASH)
                 .replace("__SENT__", datetime.now().strftime("%Y-%m-%d %H:%M")))
 
     message = EmailMessage()
-    message["Subject"] = "[Databricks 전환 검증] ETL 대시보드 프로파일 편집 기능 개선"
+    message["Subject"] = ("[Databricks 전환 검증] ETL 대시보드 프로파일 편집 · "
+                          "응답 시간 개선")
     message["From"] = sender
     message["To"] = recipient
     message.set_content(
-        "ETL 대시보드 프로파일 편집 기능을 개선했습니다.\n\n"
-        "1) 편집 방법을 두 갈래로 분리\n"
-        "   - 체크박스 화면 : 컬럼 include/exclude, 비식별화, 처리종류, 주기\n"
-        "   - YAML 원본 편집: /profiles/<엔진>/<스키마>/raw\n"
-        "     그대로 읽고 · 고치고 · 저장 (주석도 보존)\n\n"
-        "2) 저장은 검증 통과 후에만. 실패하면 파일을 건드리지 않는다\n"
-        "   - YAML 문법 / columns 비어있음 / include·exclude 정합성 /\n"
-        "     merge 인데 기본키 없음 → 거부\n"
-        "   - 저장 직전 자동 백업, 되돌리기 버튼 제공\n\n"
-        "3) 저장 후 변경 요약 표시 (무엇이 바뀌었는지)\n\n"
-        f"4) 자동 검증 {result.get('통과')}/{result.get('전체')} 통과\n"
-        "   재현: python scripts/test_profile_editor.py\n\n"
-        f"상세 매뉴얼 : {MANUAL}\n"
-        f"GitHub      : {REPO_URL}\n"
-        f"로컬 대시보드 : http://127.0.0.1:8540\n\n"
+        "ETL 대시보드를 개선했습니다.\n\n"
+        "1) 프로파일 편집 — YAML 원본을 읽고·고치고·저장\n"
+        "   /profiles/<엔진>/<스키마>/raw\n"
+        "   저장은 검증 통과 후에만. 실패하면 파일을 건드리지 않는다\n"
+        "   (문법 / columns 비어있음 / include·exclude 정합성 /\n"
+        "    merge 인데 기본키 없음 → 거부)\n"
+        "   저장 직전 자동 백업 + 되돌리기\n\n"
+        "2) 저장 후 변경 요약 표시 (무엇이 바뀌었는지)\n\n"
+        "3) 대시보드 응답 시간 25초 → 0초\n"
+        "   TTL 캐시(원천 120초·통계 90초) + 시작 시 백그라운드 예열\n"
+        "   화면에 값의 신선도를 적고, 조회가 실패하면 이전 값을 유지한다.\n"
+        "   /api/stats 는 캐시를 우회한다(현재 값이 필요하므로).\n\n"
+        f"4) 자동 검증 : {test_line}\n"
+        f"   재현 : python scripts/test_profile_editor.py\n\n"
+        f"매뉴얼 : {MANUAL}\n"
+        f"GitHub  : {REPO_URL}\n"
+        f"로컬    : {DASH}\n\n"
         "⚠ Slack Incoming Webhook URL 이 Git 이력에 올라간 적이 있어\n"
         "  Slack 에서 해당 웹훅을 삭제하고 새로 만들어 주십시오.\n")
     message.add_alternative(html, subtype="html")
 
-    print("라우트 상태:")
-    for label, state in routes:
-        print(f"  {state:24s} {label}")
     print(f"\n발송 대상 : {sender} → {recipient}")
     with smtplib.SMTP(host, port, timeout=60) as server:
         server.starttls()

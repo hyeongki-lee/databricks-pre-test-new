@@ -39,8 +39,10 @@
     {% if discovery_age is defined and discovery_age < 3 %}
       방금 조회한 값입니다.
     {% elif discovery_age is defined %}
-      {{ discovery_age }}초 전에 조회한 값을 재사용하고 있습니다
-      (원천 DB 3곳 + Databricks 조회가 화면마다 일어나기 때문).
+      {{ discovery_age }}초 전에 조회한 값을 표시하고 있습니다
+      {% if discovery_refreshing %}<b>(백그라운드에서 갱신 중)</b>{% endif %}
+      — 원천 DB 3곳 + Databricks 조회가 약 34초 걸려서,
+      갱신이 끝나기 전까지는 <b>이전 값을 즉시 보여드리는 방식</b>입니다.
       <code>/api/stats</code> 는 캐시를 쓰지 않으므로 언제든 현재 값을 얻을 수 있습니다.
     {% endif %}
     {% if discovery_error %}
