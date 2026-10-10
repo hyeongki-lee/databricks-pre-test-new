@@ -49,6 +49,11 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)-5s %(message)s")
 logger = logging.getLogger("dashboard")
 
+#: 검증에 사용한 테이블당 행 수. 감사 테이블 집계를 이 규모로 한정한다.
+#: (감사 테이블은 실행을 누적하므로 규모를 걸지 않으면 과거 200건 시험
+#:  기록의 FAIL 이 현재 결과와 나란히 표시된다)
+VERIFIED_SCALE = 50000
+
 app = Flask(__name__)
 app.secret_key = "databricks-pre-test-new-dashboard"   # noqa: S105
 
@@ -60,6 +65,12 @@ SCHEDULE_CODES = profile_mod.SCHEDULE_CODES
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday",
             "friday", "saturday", "sunday"]
 WEEKDAY_KO = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+
+#: (index, label) 쌍으로 미리 묶어 템플릿에 넘긴다.
+#: Measured: Jinja2 에는 `zip` 이 없어 `{% for code, ko in zip(...) %}` 가
+#: `jinja2.exceptions.UndefinedError: 'zip' is undefined` 로 죽었다.
+#: 스키마 상세 화면(컬럼 편집·제외 체크박스)이 실제로 500 을 내는 원인이었다.
+WEEKDAY_OPTIONS = list(enumerate(WEEKDAY_KO))
 
 
 # ---------------------------------------------------------------------------
@@ -95,21 +106,48 @@ def discover() -> dict:
 
 
 def databricks_stats() -> dict:
-    """Read run statistics back from the audit tables (requirement 9)."""
+    """Read run statistics back from the audit tables (requirement 9).
+
+    Measured: both audit tables accumulate every run, so grouping only by
+    `work_type` mixes the 200-row smoke runs with the 50,000-row
+    verification. That made the panel show `FAIL 3` next to the real
+    result, which reads as a current failure when it is a superseded one.
+
+    Rows are therefore scoped to the current scale — nothing is deleted:
+      · load_audit → `source_count = 50000`
+      · etl_run_log → the most recent `run_id`
+    The cumulative totals are reported next to the scoped figures so nothing
+    is hidden.
+    """
     try:
         schema = f"{cfg.get_databricks_config()['catalog']}." \
                  f"{cfg.get_databricks_config().get('meta_schema', 'pretest_meta')}"
         if not dbx.table_exists(f"{schema}.load_audit"):
             return {"사용 가능": False, "사유": "로그 테이블이 아직 생성되지 않았습니다"}
 
+        latest = latest_run_id(schema)
+
         rows = dbx.execute_sql(
-            f"SELECT work_type, status_code, COUNT(*) AS cnt "
-            f"FROM {schema}.etl_run_log GROUP BY work_type, status_code "
-            "ORDER BY work_type, status_code")
+            f"SELECT work_type, etl_type, status_code, COUNT(*) AS cnt "
+            f"FROM {schema}.etl_run_log WHERE run_id='{latest}' "
+            "GROUP BY work_type, etl_type, status_code "
+            "ORDER BY work_type, etl_type, status_code")
+
+        load_rows = dbx.execute_sql(
+            f"SELECT engine, COUNT(*) AS cnt, "
+            f"       SUM(CASE WHEN count_match='Y' THEN 1 ELSE 0 END) AS ok "
+            f"FROM {schema}.load_audit WHERE work_type='initial_load' "
+            f"  AND source_count={VERIFIED_SCALE} "
+            "GROUP BY engine ORDER BY engine")
+
         return {
             "사용 가능": True,
+            "기준_run_id": latest,
+            "검증규모": VERIFIED_SCALE,
             "집계": [dict(zip([c["name"] for c in rows["columns"]], r))
                     for r in rows["rows"]],
+            "초기이관": [dict(zip([c["name"] for c in load_rows["columns"]], r))
+                     for r in load_rows["rows"]],
             "load_audit_건수": dbx.fetch_value(
                 f"SELECT COUNT(*) FROM {schema}.load_audit"),
             "etl_run_log_건수": dbx.fetch_value(
@@ -120,11 +158,32 @@ def databricks_stats() -> dict:
         return {"사용 가능": False, "사유": f"{type(exc).__name__}: {exc}"}
 
 
+def latest_run_id(schema: str) -> str:
+    """Most recent ETL `run_id`, used to scope the aggregates."""
+    rows = dbx.execute_sql(
+        f"SELECT run_id FROM {schema}.etl_run_log "
+        "GROUP BY run_id ORDER BY MAX(started_at) DESC LIMIT 1")
+    return str(rows["rows"][0][0]) if rows["rows"] else ""
+
+
 def recent_logs(schema: str, limit: int = 20) -> list[dict]:
-    """Most recent audit rows, newest first."""
+    """Most recent audit rows, newest first.
+
+    Measured: `etl_run_log` has **no** `source_count` / `target_count` columns.
+    Those live in `load_audit`, which is the file-load count check. Selecting
+    them here produced
+
+        [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column ... 'source_count'
+        cannot be resolved. Did you mean ... ['run_id', 'schedule_code', ...]
+
+    and the whole statistics panel rendered that error instead of data.
+    Only the columns this table actually declares are selected, plus
+    `row_affected`, which is its own equivalent of an affected-row count.
+    """
     result = dbx.execute_sql(
         f"SELECT run_id, work_type, engine, schema_name, table_name, "
-        f"etl_type, status, source_count, target_count, duration_sec "
+        f"etl_type, status, status_code, workers, row_affected, "
+        f"duration_sec, ended_at "
         f"FROM {schema}.etl_run_log ORDER BY ended_at DESC LIMIT {limit}")
     column_name = [c["name"] for c in result["columns"]]
     return [dict(zip(column_name, r)) for r in result["rows"]]
@@ -173,7 +232,7 @@ def profile_detail(engine: str, schema: str):
         engine=engine, schema=schema, document=document,
         live=live, summary=profile_mod.summary(engine, schema),
         deid_codes=DEID_CODES, load_types=LOAD_TYPES,
-        schedule_codes=SCHEDULE_CODES, weekdays=WEEKDAYS, weekday_ko=WEEKDAY_KO,
+        schedule_codes=SCHEDULE_CODES, weekday_options=WEEKDAY_OPTIONS,
     )
 
 

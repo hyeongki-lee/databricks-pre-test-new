@@ -42,11 +42,34 @@
     <div class="kpi"><b>{{ stats.집계|length }}</b><span>집계 조합</span></div>
   </div>
 
-  <h3>집계</h3>
+  <p class="mut" style="margin:10px 0 4px">
+    아래 집계는 <b>현재 검증 결과만</b> 표시한다.
+    초기 이관 = <code>source_count {{ '{:,}'.format(stats.검증규모|int) }}</code>,
+    ETL = 가장 최근 <code>run_id</code>.
+    감사 테이블은 실행을 누적하므로, 과거 200건 시험 기록이 섞이면
+    현재 결과가 아닌 <code>FAIL</code> 이 함께 보인다.
+    행은 삭제하지 않고 <b>표시 범위만</b> 한정했다.</p>
+
+  {% if stats.초기이관 %}
+  <h3>초기 이관 건수 검증 (테이블당 {{ '{:,}'.format(stats.검증규모|int) }}건)</h3>
   <table>
-    <tr><th>work_type</th><th>status_code</th><th>건수</th></tr>
+    <tr><th>엔진</th><th>테이블</th><th>건수 일치</th><th>판정</th></tr>
+    {% for row in stats.초기이관 %}
+    <tr><td>{{ row.engine }}</td>
+        <td>{{ row.cnt }}</td>
+        <td>{{ row.ok }}</td>
+        <td class="{% if row.cnt|string == row.ok|string %}ok{% else %}ng{% endif %}">
+            {% if row.cnt|string == row.ok|string %}일치{% else %}불일치{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <h3>ETL 집계 <span class="mut">(run_id: {{ stats.기준_run_id }})</span></h3>
+  <table>
+    <tr><th>work_type</th><th>etl_type</th><th>status_code</th><th>건수</th></tr>
     {% for row in stats.집계 %}
     <tr><td>{{ row.work_type }}</td>
+        <td>{{ row.etl_type }}</td>
         <td class="{% if row.status_code == 'OK' %}ok{% else %}ng{% endif %}">
             {{ row.status_code }}</td>
         <td>{{ row.cnt }}</td></tr>
@@ -55,9 +78,11 @@
 
   {% if stats.최근건 %}
   <h3>최근 실행 이력 (최신순)</h3>
+  {# etl_run_log 에는 source_count / target_count 가 없다(그것은 load_audit 의
+     컬럼이다). 이 표가 쓰는 값은 이 테이블이 실제로 가진 컬럼뿐이다. #}
   <div class="scroll"><table>
     <tr><th>run_id</th><th>work_type</th><th>대상</th><th>etl_type</th>
-        <th>판정</th><th>원본</th><th>대상</th><th>초</th></tr>
+        <th>판정</th><th>workers</th><th>영향행</th><th>초</th></tr>
     {% for r in stats.최근건 %}
     <tr>
       <td class="mut">{{ r.run_id[:22] }}</td>
@@ -66,8 +91,8 @@
       <td>{{ r.etl_type }}</td>
       <td class="{% if r.status_code == 'OK' %}ok{% else %}ng{% endif %}">
           {{ r.status_code }}</td>
-      <td>{{ '{:,}'.format(r.source_count|int) }}</td>
-      <td>{{ '{:,}'.format(r.target_count|int) }}</td>
+      <td>{{ r.workers if r.workers is not none else '-' }}</td>
+      <td>{{ '{:,}'.format(r.row_affected|int) if r.row_affected is not none else '-' }}</td>
       <td class="mut">{{ '%.1f'|format(r.duration_sec|float) }}</td>
     </tr>
     {% endfor %}

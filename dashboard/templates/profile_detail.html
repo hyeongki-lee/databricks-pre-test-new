@@ -71,9 +71,9 @@
       </select></label>
     <label>요일
       <select name="dow__{{ table }}">
-        {% for code, ko in zip(weekdays, weekday_ko) %}
-        <option value="{{ loop.index0 }}"
-          {% if (entry.get('schedule') or {}).get('day_of_week') == loop.index0 %}selected{% endif %}>
+        {% for idx, ko in weekday_options %}
+        <option value="{{ idx }}"
+          {% if (entry.get('schedule') or {}).get('day_of_week') == idx %}selected{% endif %}>
           {{ ko }}</option>
         {% endfor %}
       </select></label>

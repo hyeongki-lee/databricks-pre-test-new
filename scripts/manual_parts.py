@@ -891,6 +891,27 @@ def build(data: dict, style: str, h: dict) -> str:
               "대시보드 개요 — 등록된 ETL 프로파일 12개(엔진 · 스키마 · 테이블 수 · "
               "활성 여부 · 작업 주기 · 등록일). 활성 5/5 로 전 스키마가 "
               "초기 이관을 마치고 정규 작업으로 넘어간 상태."))
+    add(image("08_dashboard_column_edit.png",
+              "스키마 상세 — 컬럼 편집 화면. include / exclude 체크박스와 "
+              "비식별화 코드 선택이 요구사항의 핵심 조작이다. address 의 exclude 가 "
+              "체크되어 있고 name=D1 해시 · email=D2 null · phone=D3 마스킹이 "
+              "배정돼 있다. 처리 종류(증분/전체/병합) · 기본키 · 활성 · 작업 주기 · "
+              "요일 · 고정일도 같은 화면에서 바꾼다."))
+    add('<div class="callout warn"><b>대시보드를 띄우다 발견한 결함 3건</b>'
+        '<b>① <code>etl_run_log</code> 에 <code>source_count</code> 가 없다</b> — '
+        '파일 적재 건수 대조는 <code>load_audit</code> 의 몫이다. 대시보드가 이를 '
+        'SELECT 해 <code>[UNRESOL_COLUMN.WITH_SUGGESTION]</code> 로 터졌고, '
+        '통계 패널 전체가 SQL 에러 문구로 렌더링됐다.<br>'
+        '<b>② Jinja2 에 <code>zip</code> 이 없다</b> — '
+        '<code>{% for code, ko in zip(weekdays, weekday_ko) %}</code> 가 '
+        "<code>jinja2.exceptions.UndefinedError: 'zip' is undefined</code> 로 "
+        '죽어 <b>컬럼 편집 화면 자체가 500</b> 이었다. 요일 선택 목록은 파이썬에서 '
+        '<code>(index, label)</code> 쌍으로 만들어 넘긴다.<br>'
+        '<b>③ 감사 로그 누적으로 과거 시험 기록이 현재 결과와 섞인다</b> — '
+        '집계에 <code>FAIL 3</code> 이 보였는데, 그것은 200건 시험 시기의 것이지 '
+        '현재 실패가 아니었다. <b>행은 삭제하지 않고 표시 범위만</b> 한정했다'
+        '(초기 이관 = <code>source_count</code> 5만, ETL = 가장 최근 '
+        '<code>run_id</code>).</div>')
     add("</section>")
 
     # ---------------- 15. Slack ----------------
