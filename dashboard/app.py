@@ -35,10 +35,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from flask import (Flask, flash, jsonify, redirect, render_template,
+from flask import (Flask, abort, flash, jsonify, redirect, render_template,
                    request, url_for)
 
+import profile_editor as editor                # noqa: E402
 from lib import config as cfg                  # noqa: E402
 from lib import dbx                            # noqa: E402
 from lib import mask as mask_mod               # noqa: E402
@@ -233,15 +235,23 @@ def profile_detail(engine: str, schema: str):
         live=live, summary=profile_mod.summary(engine, schema),
         deid_codes=DEID_CODES, load_types=LOAD_TYPES,
         schedule_codes=SCHEDULE_CODES, weekday_options=WEEKDAY_OPTIONS,
+        has_backup=editor.backup_path(engine, schema).exists(),
     )
 
 
 @app.route("/profiles/<engine>/<schema>/save", methods=["POST"])
 def profile_save(engine: str, schema: str):
-    """Persist the edited definition back to the schema's YAML file."""
-    document = profile_mod.read(engine, schema)
+    """Persist the edited definition back to the schema's YAML file.
+
+    A backup is taken first so the write can be undone from the same page.
+    After saving the change summary is shown, because "did it actually save?"
+    was not answerable from the UI.
+    """
+    before = profile_mod.read(engine, schema)
+    editor.make_backup(engine, schema)
 
     form = request.form
+    document = profile_mod.read(engine, schema)
     document["schedule"] = {"type": form.get("schedule_type", "daily")}
     document["registered_at"] = form.get("registered_at", date.today().isoformat())
 
@@ -284,7 +294,91 @@ def profile_save(engine: str, schema: str):
             return redirect(url_for("profile_detail", engine=engine, schema=schema))
 
     path = profile_mod.write(engine, schema, document)
-    flash(f"{path.name} 저장 완료 ({len(tables)}개 테이블)", "success")
+    changes = editor.summarise_changes(before, document)
+    flash(f"{path.name} 저장 완료 · {len(tables)}개 테이블", "success")
+    # 변경 내용을 함께 보여준다. 저장 성공 여부를 눈으로 확인할 수 있어야 한다.
+    for line in changes:
+        flash(line, "change")
+    return redirect(url_for("profile_detail", engine=engine, schema=schema))
+
+
+# ---------------------------------------------------------------------------
+# Raw YAML editor — read, edit, save
+# ---------------------------------------------------------------------------
+
+@app.route("/profiles/<engine>/<schema>/raw")
+def profile_raw(engine: str, schema: str):
+    """Edit the YAML source directly.
+
+    Why this exists: the checkbox editor cannot express everything — a
+    column dropped upstream, a schedule condition added by hand, a comment to
+    record why. Without this page the only way to change those was to open the
+    file in an editor outside the dashboard, which is exactly the friction this
+    screen removes.
+    """
+    if not profile_mod.exists(engine, schema):
+        abort(404, description=f"프로파일이 없습니다: {engine}.{schema}")
+
+    text = request.args.get("text")
+    original = profile_mod.file_path(engine, schema).read_text(encoding="utf-8")
+
+    # 제출 후 오류로 되돌아온 경우 편집 내용을 그대로 다시 보여준다.
+    if text is None:
+        text = original
+
+    ok, _, error = editor.validate_yaml_text(text)
+    diff = editor.unified_diff(engine, schema, text) if ok else ""
+
+    return render_template(
+        "profile_raw.html",
+        engine=engine, schema=schema,
+        path=profile_mod.file_path(engine, schema),
+        original=original, text=text,
+        valid=ok, error=error, diff=diff,
+        has_backup=editor.backup_path(engine, schema).exists(),
+    )
+
+
+@app.route("/profiles/<engine>/<schema>/raw", methods=["POST"])
+def profile_raw_save(engine: str, schema: str):
+    """Validate, then write. A malformed document never reaches disk."""
+    text = request.form.get("text", "")
+
+    if request.form.get("action") == "reset":
+        return redirect(url_for("profile_raw", engine=engine, schema=schema))
+
+    ok, document, error = editor.validate_yaml_text(text)
+    if not ok:
+        # 파일을 건드리지 않는다. 편집 내용은 되돌려 다시 보여준다.
+        return render_template(
+            "profile_raw.html",
+            engine=engine, schema=schema,
+            path=profile_mod.file_path(engine, schema),
+            original=profile_mod.file_path(engine, schema).read_text(encoding="utf-8"),
+            text=text, valid=False, error=error,
+            diff=editor.unified_diff(engine, schema, text),
+            has_backup=editor.backup_path(engine, schema).exists()), 400
+
+    before = profile_mod.read(engine, schema)
+    editor.make_backup(engine, schema)
+    # Measured: profile.write() re-serialises through yaml.safe_dump and drops
+    # every comment. On the raw editor that defeats the purpose, so the
+    # submitted text is written verbatim. It was already parsed and validated
+    # above, so the file is known to be well-formed.
+    editor.write_raw_text(engine, schema, text)
+
+    changes = editor.summarise_changes(before, document)
+    flash(f"{profile_mod.file_path(engine, schema).name} 저장 완료", "success")
+    for line in changes:
+        flash(line, "change")
+    return redirect(url_for("profile_detail", engine=engine, schema=schema))
+
+
+@app.route("/profiles/<engine>/<schema>/rollback", methods=["POST"])
+def profile_rollback(engine: str, schema: str):
+    """Undo the most recent write."""
+    done, message = editor.rollback(engine, schema)
+    flash(message, "success" if done else "error")
     return redirect(url_for("profile_detail", engine=engine, schema=schema))
 
 

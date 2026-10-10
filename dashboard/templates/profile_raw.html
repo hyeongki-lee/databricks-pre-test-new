@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block body %}
+
+{% for category, m in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ category }}">{{ m }}</div>
+{% endfor %}
+
+<div class="card">
+  <h2>YAML 원본 편집 — {{ engine }} · {{ schema }}</h2>
+
+  <div class="mut" style="margin-bottom:10px;font-size:13px">
+    파일 : <code>{{ path }}</code><br>
+    이 화면은 YAML 을 <b>읽고 · 고치고 · 저장</b>하는 곳이다.
+    체크박스 화면으로는 표현할 수 없는 값(원천에서 빠진 컬럼, 손으로 넣을
+    주기 조건, 사유를 적은 주석)을 여기서 다룬다.
+    <b>문법이 틀리면 저장하지 않고 원본을 그대로 둔다.</b>
+  </div>
+
+  {% if error %}
+  <div class="flash error">
+    <b>저장하지 않았습니다.</b><br>{{ error }}
+  </div>
+  {% else %}
+  <div class="flash success">구문 검사 통과 — 저장할 수 있습니다.</div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('profile_raw_save', engine=engine, schema=schema) }}">
+    <input type="hidden" name="text" value="x">
+    <textarea name="text" id="yaml_text" spellcheck="false"
+      style="width:100%;min-height:560px;font-family:Consolas,Menlo,monospace;
+             font-size:12.5px;line-height:1.55;padding:12px;
+             border:1px solid var(--line);border-radius:6px">{{ text }}</textarea>
+
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;
+                align-items:center">
+      <button type="submit" name="action" value="save"
+              {% if not valid %}disabled style="opacity:.5;cursor:not-allowed"{% endif %}>
+        저장
+      </button>
+      <button type="submit" name="action" value="reset"
+              style="background:#fff;color:var(--txt);border-color:var(--line)">
+        편집 취소 (원본으로)
+      </button>
+      {% if has_backup %}
+      <span class="mut" style="font-size:12.5px">
+        직전 저장 백업이 있습니다 —
+        <a href="{{ url_for('profile_detail', engine=engine, schema=schema) }}">상세 화면</a>에서 되돌릴 수 있습니다.
+      </span>
+      {% endif %}
+      <span class="mut" style="font-size:12.5px;margin-left:auto">
+        글자 수 {{ text|length }}
+      </span>
+    </div>
+  </form>
+</div>
+
+{% if diff %}
+<div class="card">
+  <h2>저장 시 반영될 차이</h2>
+  <pre>{{ diff }}</pre>
+  <div class="mut" style="font-size:12.5px">
+    <span class="ok">-</span> 는 현재 저장된 파일에서 빠지는 줄,
+    <span class="ng">+</span> 는 새로 들어가는 줄이다.
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>구조 규칙</h2>
+  <table>
+    <tr><th>항목</th><th>규칙</th><th>왜</th></tr>
+    <tr><td><code>columns</code></td>
+        <td>비어 있으면 안 된다</td>
+        <td>이 목록이 <b>등록 시점 기준선</b>이다. 비면 어떤 컬럼을
+            적재할지 판단할 근거가 사라진다</td></tr>
+    <tr><td><code>exclude_columns</code></td>
+        <td><code>columns</code> 에 있는 값만 가능</td>
+        <td>기준선에 없는 컬럼을 제외한다는 건 모순이다</td></tr>
+    <tr><td><code>include_columns</code></td>
+        <td><code>columns</code> 에 있는 값만 가능</td>
+        <td>비우면 <code>columns</code> 전체가 기준이 된다</td></tr>
+    <tr><td><code>etl_type: merge</code></td>
+        <td><code>primary_key</code> 필수</td>
+        <td>병합의 키가 없으면 대상이 뒤엉켜 중복이 생긴다</td></tr>
+  </table>
+  <div class="mut" style="margin-top:8px;font-size:12.5px">
+    이 검사는 저장 전에 수행한다. 어기면 <b>파일에 쓰지 않는다.</b>
+  </div>
+</div>
+
+<div class="card">
+  <h2>다른 편집 경로</h2>
+  <ul style="margin:0;padding-left:20px">
+    <li><a href="{{ url_for('profile_detail', engine=engine, schema=schema) }}">
+        체크박스 화면</a> — 컬럼 include/exclude · 비식별화 · 처리종류 ·
+        기본키 · 주기를 고르는 쪽</li>
+    <li><a href="{{ url_for('profiles') }}">프로파일 목록</a> — 12개 스키마 이동</li>
+    <li><a href="{{ url_for('builder') }}">ETL 빌더</a> — 새 테이블 등록</li>
+  </ul>
+</div>
+
+{% endblock %}

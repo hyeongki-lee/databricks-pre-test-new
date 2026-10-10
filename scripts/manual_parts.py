@@ -878,15 +878,87 @@ def build(data: dict, style: str, h: dict) -> str:
         '테스트에서는 요구사항대로 직접 쓰도록 구현했다.</div>')
     add(code("""$ python dashboard/app.py --port 8540
   대시보드 : http://127.0.0.1:8540
-  GET /                      개요 — 프로파일 · Databricks 통계 · 원천 현황
-  GET /profiles              프로파일 목록
-  GET /profiles/<e>/<s>      스키마 상세 (컬럼 편집 · 비식별화 · 주기)
-  POST /profiles/<e>/<s>/save  YAML 저장
-  GET /builder               ETL 빌더 (신규 테이블 등록)
-  GET /columns               전체 컬럼 현황
-  GET /table/add             신규 테이블 등록
-  GET /api/profiles          JSON — 프로파일
-  GET /api/stats             JSON — Databricks 통계"""))
+  GET  /                              개요 — 프로파일 · Databricks 통계 · 원천 현황
+  GET  /profiles                      프로파일 목록
+  GET  /profiles/<e>/<s>              스키마 상세 (체크박스 편집)
+  POST /profiles/<e>/<s>/save         체크박스 편집 저장
+  GET  /profiles/<e>/<s>/raw          YAML 원본 읽기·편집
+  POST /profiles/<e>/<s>/raw          YAML 원본 저장 (검증 후에만)
+  POST /profiles/<e>/<s>/rollback     직전 저장 되돌리기
+  GET  /builder                       ETL 빌더 (신규 테이블 등록)
+  GET  /columns                       전체 컬럼 현황
+  GET  /table/add                     신규 테이블 등록
+  GET  /api/profiles                  JSON — 프로파일
+  GET  /api/stats                     JSON — Databricks 통계"""))
+
+    add("<h3>14.1 프로파일 편집 — 두 갈래</h3>")
+    add("<p>편집 방법을 명시적으로 나눴다. 이전에는 체크박스 폼만 있어서 "
+        "\"편집\"이 그곳뿐인 줄 알았고, 결국 저장소에서 YAML 파일을 직접 "
+        "열게 되었다.</p>")
+    add(tbl(["경로", "하는 일", "저장 방식"], [
+        ["<b>① 체크박스 화면</b><br><code>/profiles/&lt;e&gt;/&lt;s&gt;</code>",
+         "컬럼 include·exclude, 비식별화 코드, 처리종류, 기본키, "
+         "활성 플래그, 작업주기·요일·고정일",
+         "dict 를 <code>yaml.safe_dump</code> 으로 직렬화"],
+        ["<b>② YAML 원본 편집</b><br>"
+         "<code>/profiles/&lt;e&gt;/&lt;s&gt;/raw</code>",
+         "그대로 읽고 · 고치고 · 저장. 원천에서 빠진 컬럼, 손으로 넣을 "
+         "주기 조건, <b>사유를 적은 주석</b> 을 남길 수 있다",
+         "제출한 텍스트를 <b>그대로 기록</b>"],
+    ]))
+    add('<div class="callout warn"><b>원본 편집이 주석을 지우는 결함을 '
+        '찾고 고쳤다</b>'
+        '<code>profile.write()</code> 는 dict 를 <code>yaml.safe_dump</code> '
+        '으로 다시 직렬화하는데, 이 과정은 <b>모든 주석을 버린다</b>. '
+        '체크박스 편집에는 상관없지만 원본 편집에서는 치명적이다 — '
+        '"이 컬럼을 제외한 이유" 를 주석으로 남겨 둔 것이 저장과 동시에 '
+        '사라지기 때문이다. 그래서 원본 편집 경로는 파싱·검증을 통과한 '
+        '텍스트를 <b>문자 그대로 파일에 쓴다.</b></div>')
+
+    add("<h3>14.2 저장 안전장치</h3>")
+    add(tbl(["순서", "검사", "실패하면"], [
+        ["1", "YAML 문법 파싱",
+         "<b>파일을 건드리지 않는다.</b> 오류 문구와 편집 내용을 되돌려 보여준다"],
+        ["2", "<code>columns</code> 가 비어 있지 않은가",
+         "기준선이 사라지면 어떤 컬럼을 적재할지 판단할 근거가 없다"],
+        ["3", "<code>exclude</code>·<code>include</code> 값이 "
+              "<code>columns</code> 안에 있는가",
+         "기준선에 없는 컬럼을 제외한다는 건 모순이다"],
+        ["4", "<code>etl_type: merge</code> 인데 "
+              "<code>primary_key</code> 가 있는가",
+         "병합 키가 없으면 대상이 뒤엉켜 중복이 생긴다"],
+        ["5", "저장 직전 자동 백업(<code>.yaml.bak</code>)",
+         "저장 후 <b>되돌리기</b> 버튼으로 즉시 복구"],
+    ]))
+    add(code("""# 자동 검증 — 10개 항목 통과 확인
+$ python scripts/test_profile_editor.py
+  [PASS] YAML 편집 화면 열림
+  [PASS] 저장 전 구문 검사 표시
+  [PASS] 정상 YAML 저장 반영
+  [PASS] 저장된 파일 내용 확인
+  [PASS] 변경 요약 표시 (flash)
+  [PASS] 문법 오류 거부 + 파일 보존
+  [PASS] merge+primary_key 없음 거부 + 파일 보존
+  [PASS]   거부 사유에 primary_key 언급
+  [PASS] 되돌리기로 원상 복구
+  [PASS] 최종 상태 원본과 동일"""))
+
+    add("<h3>14.3 저장하면 무엇이 바뀌었는지 알려준다</h3>")
+    add("<p>저장 후 리다이렉트만 하면 \"실제로 반영됐나\" 를 눈으로 확인할 "
+        "수 없었다. 그래서 변경된 항목만 나열해 함께 보여준다.</p>")
+    add(code("""table_1: 처리종류 append → merge
+table_1: 기본키 '-' → 'id'
+table_2: 제외 추가 ['name']
+table_2: 활성 Y → N
+table_2: 비식별화 {'name': 'D1'} → {'name': 'D3'}"""))
+    add('<div class="callout"><b>이 기능을 만들며 잡은 버그</b>'
+        '변경 요약 함수의 존재 여부 검사 대상을 잘못 잡았다. '
+        '<code>name not in old</code> 로 검사했는데 <code>old</code> 는 '
+        '테이블의 <b>필드</b> 사전이라 이 조건이 언제나 참이었고, '
+        '그 결과 모든 테이블이 \"새로 등록\" 으로만 보고되었다. '
+        '<code>name not in old_tables</code> 로 고쳐서야 실제 변경이 잡혔다. '
+        '단위 검증 8종(추가·해제·유형·활성·비식별화·주기·추가 등록·무변경)을 '
+        '만들어 같은 실수를 되돌아가지 않게 했다.</div>')
     add(image("07_dashboard_profiles.png",
               "대시보드 개요 — 등록된 ETL 프로파일 12개(엔진 · 스키마 · 테이블 수 · "
               "활성 여부 · 작업 주기 · 등록일). 활성 5/5 로 전 스키마가 "
